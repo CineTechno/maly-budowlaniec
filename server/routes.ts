@@ -53,17 +53,25 @@ async function generatePriceEstimate(query: string): Promise<string> {
   try {
     // Set up pricing data to ground the model's responses in realistic pricing
     const serviceInfo = `
-      Here's our service pricing:
-      - Basic Handyman Services: $75 per hour
-      - Drywall Repair: $150 per patch
-      - Tile Installation: $12 per sq ft
-      - Kitchen Remodel: $5,000+ depending on size and materials
-      - Bathroom Remodel: $3,500+ depending on fixtures and extent of work
-      - Light Fixture Installation: $85 per fixture
-      - Fence Installation: $25 per linear ft
-      - Deck Building: $35 per sq ft
-      - Interior Painting: $2.50 per sq ft
-      - Cabinet Installation: $100 per cabinet
+      Here's our service pricing (all prices in Polish Zloty - zł):
+      - Podstawowe usługi: 90 zł za godzinę
+      - Naprawa płyt gipsowo-kartonowych: 200 zł za miejsce
+      - Układanie płytek: 120 zł za m²
+      - Remont kuchni: 20 000 zł (od)
+      - Remont łazienki: 15 000 zł (od)
+      - Montaż oświetlenia: 150 zł za punkt
+      - Montaż ogrodzenia: 200 zł za mb
+      - Budowa tarasu: 400 zł za m²
+      - Malowanie wnętrz: 30 zł za m²
+      - Montaż szafek: 250 zł za szafkę
+      - Wymiana drzwi wewnętrznych: 350 zł za sztukę
+      - Wymiana okien: 800 zł za m²
+      - Instalacja elektryczna: 100 zł za punkt
+      - Instalacja hydrauliczna: 150 zł za punkt
+      - Montaż paneli podłogowych: 60 zł za m²
+      - Układanie parkietu: 120 zł za m²
+      - Wyburzanie ścian: 300 zł za m²
+      - Tynkowanie: 70 zł za m²
     `;
     
     // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
@@ -72,23 +80,31 @@ async function generatePriceEstimate(query: string): Promise<string> {
       messages: [
         {
           role: "system",
-          content: `You are a helpful assistant for a handyman and building service company named HandyPro. Your role is to provide price estimates for home improvement and repair projects based on the client's description. 
+          content: `Jesteś asystentem wycen dla polskiej firmy remontowo-budowlanej "BudTeam". Twoim zadaniem jest dostarczanie wycen projektów remontowych i budowlanych na podstawie opisu klienta.
           
           ${serviceInfo}
           
-          Give a reasonable price range based on the information provided. If the client doesn't provide enough information, ask for the necessary details to give an accurate estimate. Be friendly and professional. Don't provide estimates for services outside our scope. Always invite them to contact us for a detailed quote.`
+          W odpowiedzi zawsze:
+          1. Pokaż listę usług potrzebnych do wykonania zadania w formie tabeli: "Usługa: Cena × Ilość = Koszt całkowity"
+          2. Po liście usług, podaj łączny koszt wszystkich prac, np. "SUMA: 1245 zł"
+          3. Jeśli klient nie podał wystarczających informacji, poproś o szczegóły potrzebne do dokładnej wyceny
+          4. Bądź uprzejmy i profesjonalny. Nie podawaj wycen usług spoza naszego zakresu
+          5. Zawsze używaj złotych (zł) jako jednostki walutowej
+          6. Komunikuj się wyłącznie po polsku
+          
+          Odpowiedź musi zawierać listę potrzebnych usług, jedna pod drugą, z cenami i obliczeniem łącznego kosztu (cena × ilość), a na końcu SUMĘ wszystkich kosztów.`
         },
         {
           role: "user",
           content: query
         }
       ],
-      max_tokens: 300,
+      max_tokens: 500,
     });
     
-    return completion.choices[0].message.content || "I'm sorry, I couldn't generate an estimate. Please contact us directly for a personalized quote.";
+    return completion.choices[0].message.content || "Przepraszam, nie mogłem wygenerować wyceny. Proszę skontaktować się z nami bezpośrednio, aby uzyskać spersonalizowaną ofertę.";
   } catch (error) {
     console.error("Error calling OpenAI API:", error);
-    return "I apologize, but I'm having trouble generating an estimate right now. Please try again later or contact us directly for a personalized quote.";
+    return "Przepraszam, mam problem z wygenerowaniem wyceny w tej chwili. Proszę spróbować ponownie później lub skontaktować się z nami bezpośrednio.";
   }
 }

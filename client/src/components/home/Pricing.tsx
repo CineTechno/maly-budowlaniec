@@ -12,16 +12,24 @@ interface PricingItem {
 }
 
 const pricingItems: PricingItem[] = [
-  { id: 1, service: "Basic Handyman Services", price: "$75", unit: "per hour" },
-  { id: 2, service: "Drywall Repair", price: "$150", unit: "per patch" },
-  { id: 3, service: "Tile Installation", price: "$12", unit: "per sq ft" },
-  { id: 4, service: "Kitchen Remodel", price: "$5,000", unit: "starting at" },
-  { id: 5, service: "Bathroom Remodel", price: "$3,500", unit: "starting at" },
-  { id: 6, service: "Light Fixture Installation", price: "$85", unit: "per fixture" },
-  { id: 7, service: "Fence Installation", price: "$25", unit: "per linear ft" },
-  { id: 8, service: "Deck Building", price: "$35", unit: "per sq ft" },
-  { id: 9, service: "Interior Painting", price: "$2.50", unit: "per sq ft" },
-  { id: 10, service: "Cabinet Installation", price: "$100", unit: "per cabinet" }
+  { id: 1, service: "Podstawowe usługi", price: "90 zł", unit: "za godzinę" },
+  { id: 2, service: "Naprawa płyt gipsowo-kartonowych", price: "200 zł", unit: "za miejsce" },
+  { id: 3, service: "Układanie płytek", price: "120 zł", unit: "za m²" },
+  { id: 4, service: "Remont kuchni", price: "20 000 zł", unit: "od" },
+  { id: 5, service: "Remont łazienki", price: "15 000 zł", unit: "od" },
+  { id: 6, service: "Montaż oświetlenia", price: "150 zł", unit: "za punkt" },
+  { id: 7, service: "Montaż ogrodzenia", price: "200 zł", unit: "za mb" },
+  { id: 8, service: "Budowa tarasu", price: "400 zł", unit: "za m²" },
+  { id: 9, service: "Malowanie wnętrz", price: "30 zł", unit: "za m²" },
+  { id: 10, service: "Montaż szafek", price: "250 zł", unit: "za szafkę" },
+  { id: 11, service: "Wymiana drzwi wewnętrznych", price: "350 zł", unit: "za sztukę" },
+  { id: 12, service: "Wymiana okien", price: "800 zł", unit: "za m²" },
+  { id: 13, service: "Instalacja elektryczna", price: "100 zł", unit: "za punkt" },
+  { id: 14, service: "Instalacja hydrauliczna", price: "150 zł", unit: "za punkt" },
+  { id: 15, service: "Montaż paneli podłogowych", price: "60 zł", unit: "za m²" },
+  { id: 16, service: "Układanie parkietu", price: "120 zł", unit: "za m²" },
+  { id: 17, service: "Wyburzanie ścian", price: "300 zł", unit: "za m²" },
+  { id: 18, service: "Tynkowanie", price: "70 zł", unit: "za m²" }
 ];
 
 interface ChatMessage {
@@ -34,7 +42,7 @@ export default function Pricing() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     { 
       role: "assistant", 
-      content: "Hi there! I'm your AI assistant. Describe your project, and I'll give you a price estimate."
+      content: "Witaj! Jestem Twoim asystentem AI. Opisz swój projekt, a przedstawię Ci szacunkową wycenę."
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
@@ -78,7 +86,7 @@ export default function Pricing() {
         ...prev, 
         { 
           role: "assistant", 
-          content: "Sorry, I'm having trouble generating an estimate right now. Please try again later."
+          content: "Przepraszam, mam problem z wygenerowaniem wyceny w tej chwili. Proszę spróbować ponownie później."
         }
       ]);
     } finally {
@@ -105,9 +113,9 @@ export default function Pricing() {
           animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Our Pricing</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Cennik Usług</h2>
           <p className="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">
-            Transparent pricing with no hidden fees. Get an estimate for your specific project.
+            Przejrzyste ceny bez ukrytych opłat. Uzyskaj indywidualną wycenę dla swojego projektu.
           </p>
         </motion.div>
         
@@ -119,17 +127,17 @@ export default function Pricing() {
             animate={inView ? "visible" : "hidden"}
           >
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="p-6 bg-primary-500 text-white">
-                <h3 className="text-xl font-bold">Service Price List</h3>
-                <p className="text-white/80">Starting prices - final quotes depend on project specifics</p>
+              <div className="p-6 bg-primary-600 text-white">
+                <h3 className="text-xl font-bold">Lista Cen Usług</h3>
+                <p className="text-white/80">Ceny wyjściowe - ostateczne wyceny zależą od specyfiki projektu</p>
               </div>
               <div className="p-6 overflow-auto max-h-[500px]">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Starting Price</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usługa</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cena Początkowa</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jednostka</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -155,9 +163,9 @@ export default function Pricing() {
             animate={inView ? "visible" : "hidden"}
             transition={{ delay: 0.2 }}
           >
-            <div className="p-6 bg-secondary-500 text-white">
-              <h3 className="text-xl font-bold">AI Price Estimator</h3>
-              <p className="text-white/80">Describe your project for an instant estimate</p>
+            <div className="p-6 bg-orange-500 text-white">
+              <h3 className="text-xl font-bold">Kalkulator Wyceny AI</h3>
+              <p className="text-white/80">Opisz swój projekt, aby otrzymać natychmiastową wycenę</p>
             </div>
             <div className="p-6 h-[400px] flex flex-col">
               <div 
@@ -169,7 +177,7 @@ export default function Pricing() {
                     key={index} 
                     className={`${
                       message.role === "assistant" 
-                        ? "chat-bubble text-white bg-primary-500 p-3 rounded-lg rounded-bl-none max-w-[80%]" 
+                        ? "chat-bubble text-white bg-primary-600 p-3 rounded-lg rounded-bl-none max-w-[80%]" 
                         : "chat-bubble ml-auto bg-gray-200 p-3 rounded-lg rounded-br-none max-w-[80%]"
                     }`}
                   >
@@ -177,7 +185,7 @@ export default function Pricing() {
                   </div>
                 ))}
                 {isLoading && (
-                  <div className="chat-bubble text-white bg-primary-500 p-3 rounded-lg rounded-bl-none max-w-[80%] flex items-center space-x-2">
+                  <div className="chat-bubble text-white bg-primary-600 p-3 rounded-lg rounded-bl-none max-w-[80%] flex items-center space-x-2">
                     <div className="w-2 h-2 bg-white rounded-full animate-bounce delay-0"></div>
                     <div className="w-2 h-2 bg-white rounded-full animate-bounce delay-150"></div>
                     <div className="w-2 h-2 bg-white rounded-full animate-bounce delay-300"></div>
@@ -191,12 +199,12 @@ export default function Pricing() {
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                     className="flex-1 border border-gray-300 rounded-l-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    placeholder="Describe your project..."
+                    placeholder="Opisz swój projekt..."
                     disabled={isLoading}
                   />
                   <button
                     type="submit"
-                    className="bg-primary-500 text-white px-4 py-2 rounded-r-md hover:bg-primary-600 transition duration-150 disabled:opacity-50"
+                    className="bg-orange-500 text-white px-4 py-2 rounded-r-md hover:bg-orange-600 transition duration-150 disabled:opacity-50"
                     disabled={isLoading}
                   >
                     <Send className="h-5 w-5" />

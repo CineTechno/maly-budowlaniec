@@ -4,6 +4,7 @@ import Hero from "@/components/home/Hero";
 import Services from "@/components/home/Services";
 import Pricing from "@/components/home/Pricing";
 import Gallery from "@/components/home/Gallery";
+import Calendar from "@/components/home/Calendar";
 import Contact from "@/components/home/Contact";
 import Footer from "@/components/home/Footer";
 import ChatWidget from "@/components/chat/ChatWidget";
@@ -48,6 +49,7 @@ export default function Home() {
       <Services />
       <Pricing />
       <Gallery />
+      <Calendar />
       <Contact />
       <Footer />
       <ChatWidget />

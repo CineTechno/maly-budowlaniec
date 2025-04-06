@@ -1,12 +1,21 @@
 import { useInView } from "react-intersection-observer";
 import { motion } from "framer-motion";
-import { ChevronRight } from "lucide-react";
+import { 
+  ChevronRight, 
+  Wrench, 
+  Utensils, 
+  Bath, 
+  Grid3x3, 
+  Lightbulb, 
+  Trees
+} from "lucide-react";
 
 interface Service {
   id: number;
   title: string;
   description: string;
-  imageUrl: string;
+  icon: React.ComponentType<any>;
+  iconBgColor: string;
 }
 
 const services: Service[] = [
@@ -14,37 +23,43 @@ const services: Service[] = [
     id: 1,
     title: "Naprawy Ogólne",
     description: "Naprawiamy wszystko od cieknących kranów po uszkodzone ściany, dbając o idealny stan Twojego domu.",
-    imageUrl: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+    icon: Wrench,
+    iconBgColor: "bg-blue-100"
   },
   {
     id: 2,
     title: "Remonty Kuchni",
     description: "Przekształć swoją kuchnię dzięki niestandardowym szafkom, blatom i instalacji urządzeń pasujących do Twojego stylu.",
-    imageUrl: "https://images.unsplash.com/photo-1609766857041-ed402ea8e2c2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+    icon: Utensils,
+    iconBgColor: "bg-orange-100"
   },
   {
     id: 3,
     title: "Remonty Łazienek",
     description: "Stwórz domowe spa z nowoczesnymi armaturami, niestandardowymi płytkami i efektywnym układem przestrzeni.",
-    imageUrl: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+    icon: Bath,
+    iconBgColor: "bg-blue-100"
   },
   {
     id: 4,
     title: "Usługi Płytkarskie",
     description: "Profesjonalny montaż płytek ceramicznych, porcelanowych i kamienia naturalnego na podłogi, ściany i backsplashe.",
-    imageUrl: "https://images.unsplash.com/photo-1575652479744-42e58ef3d906?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+    icon: Grid3x3,
+    iconBgColor: "bg-orange-100"
   },
   {
     id: 5,
     title: "Prace Elektryczne",
     description: "Lekkie usługi elektryczne, w tym montaż opraw, naprawa gniazdek i modernizacja oświetlenia.",
-    imageUrl: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+    icon: Lightbulb,
+    iconBgColor: "bg-blue-100"
   },
   {
     id: 6,
     title: "Usługi Zewnętrzne",
     description: "Budowa tarasów, montaż ogrodzeń i aranżacja krajobrazu, aby ulepszyć Twoją przestrzeń na świeżym powietrzu.",
-    imageUrl: "https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+    icon: Trees,
+    iconBgColor: "bg-orange-100"
   }
 ];
 
@@ -102,25 +117,23 @@ export default function Services() {
               className="bg-gray-50 rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-xl group"
               variants={itemVariants}
             >
-              <div className="h-48 overflow-hidden">
-                <img 
-                  src={service.imageUrl} 
-                  alt={service.title} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900">{service.title}</h3>
-                <p className="mt-2 text-gray-600">
+              <div className="p-8">
+                <div className={`w-20 h-20 mx-auto mb-6 rounded-full ${service.iconBgColor} flex items-center justify-center shadow-md`}>
+                  <service.icon className="h-10 w-10 text-primary-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 text-center mb-3">{service.title}</h3>
+                <p className="text-gray-600 text-center leading-relaxed">
                   {service.description}
                 </p>
-                <a 
-                  href="#contact" 
-                  className="mt-4 inline-flex items-center text-primary-500 hover:text-primary-600 font-medium"
-                >
-                  Dowiedz się więcej
-                  <ChevronRight className="ml-1 h-4 w-4" />
-                </a>
+                <div className="mt-6 text-center">
+                  <a 
+                    href="#contact" 
+                    className="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium"
+                  >
+                    Dowiedz się więcej
+                    <ChevronRight className="ml-1 h-4 w-4" />
+                  </a>
+                </div>
               </div>
             </motion.div>
           ))}

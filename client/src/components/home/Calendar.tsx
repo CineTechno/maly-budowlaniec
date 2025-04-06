@@ -98,7 +98,7 @@ export default function Calendar() {
           </p>
         </motion.div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch h-[600px]">
           <motion.div 
             className="bg-white rounded-lg shadow-md overflow-hidden p-6 flex flex-col h-full"
             initial={{ opacity: 0, x: -20 }}
@@ -106,29 +106,41 @@ export default function Calendar() {
             transition={{ duration: 0.6, delay: 0.1 }}
           >
             <h3 className="text-xl font-semibold mb-4 text-gray-900">Wybierz Datę</h3>
-            <CalendarUI
-              mode="single"
-              selected={date}
-              onSelect={handleDateSelect}
-              locale={pl}
-              className="rounded-md border w-full"
-              modifiers={{
-                available: (day) => isSlotsAvailable(day),
-              }}
-              modifiersClassNames={{
-                available: "font-bold text-primary-600 bg-primary-50",
-              }}
-              disabled={{ before: new Date() }}
-              footer={
-                <div className="text-sm text-center mt-4 text-gray-500">
-                  <div className="flex items-center justify-center space-x-2">
-                    <Badge variant="outline" className="border-primary-600 text-primary-600 bg-primary-50">
-                      Dostępne terminy
-                    </Badge>
+            <div className="flex-grow flex flex-col">
+              <CalendarUI
+                mode="single"
+                selected={date}
+                onSelect={handleDateSelect}
+                locale={pl}
+                className="rounded-md border w-full flex-grow"
+                classNames={{
+                  root: "h-full flex flex-col",
+                  months: "flex-grow",
+                  month: "h-full",
+                  table: "h-full",
+                  row: "flex-1",
+                  head_row: "flex-shrink-0",
+                  cell: "h-12 w-12 text-center focus-within:relative p-0 relative",
+                  day: "h-10 w-10 p-0 font-normal aria-selected:opacity-100",
+                }}
+                modifiers={{
+                  available: (day) => isSlotsAvailable(day),
+                }}
+                modifiersClassNames={{
+                  available: "font-bold text-primary-600 bg-primary-50",
+                }}
+                disabled={{ before: new Date() }}
+                footer={
+                  <div className="text-sm text-center mt-4 text-gray-500">
+                    <div className="flex items-center justify-center space-x-2">
+                      <Badge variant="outline" className="border-primary-600 text-primary-600 bg-primary-50">
+                        Dostępne terminy
+                      </Badge>
+                    </div>
                   </div>
-                </div>
-              }
-            />
+                }
+              />
+            </div>
           </motion.div>
           
           <motion.div 

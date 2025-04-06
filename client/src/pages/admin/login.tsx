@@ -55,7 +55,7 @@ export default function AdminLoginPage() {
               </div>
             </div>
           </CardContent>
-          <CardFooter className="flex justify-center">
+          <CardFooter className="flex flex-col gap-3">
             <Button 
               type="submit" 
               className="w-full bg-blue-600 hover:bg-blue-700"
@@ -69,6 +69,14 @@ export default function AdminLoginPage() {
               ) : (
                 "Zaloguj się"
               )}
+            </Button>
+            <Button 
+              type="button" 
+              variant="outline"
+              className="w-full border-blue-300 text-blue-700 hover:bg-blue-50"
+              onClick={() => setLocation("/")}
+            >
+              Powrót do strony głównej
             </Button>
           </CardFooter>
         </form>

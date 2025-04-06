@@ -30,6 +30,13 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-4">
             {user && <span className="text-sm text-gray-600">Zalogowany jako: {user.username}</span>}
             <Button 
+              onClick={() => window.location.href = "/"}
+              variant="outline"
+              className="text-blue-700 border-blue-300 hover:bg-blue-50"
+            >
+              Powrót do strony głównej
+            </Button>
+            <Button 
               onClick={handleLogout} 
               variant="outline"
               className="text-red-500 border-red-300 hover:bg-red-50"

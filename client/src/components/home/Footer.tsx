@@ -1,4 +1,5 @@
 import { Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
+import { Link } from "wouter";
 
 export default function Footer() {
   return (
@@ -35,6 +36,7 @@ export default function Footer() {
               <li><a href="#contact" className="text-gray-400 hover:text-white transition-colors">Kontakt</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Polityka Prywatności</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Warunki Usługi</a></li>
+              <li><Link to="/admin/login" className="text-gray-400 hover:text-white transition-colors">Panel Admina</Link></li>
             </ul>
           </div>
         </div>

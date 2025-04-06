@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Link } from "wouter";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -37,16 +38,21 @@ export default function Navbar() {
         <div className="flex justify-between items-center">
           <div className="flex items-center">
             <a href="#hero" className="flex items-center">
-              <span className="text-primary-500 text-2xl font-bold ml-2">HandyPro</span>
+              <span className="text-blue-600 text-2xl font-bold ml-2">Mały Budowlaniec</span>
             </a>
           </div>
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
-            <a href="#services" className="text-gray-600 hover:text-primary-500 font-medium transition duration-150">Services</a>
-            <a href="#pricing" className="text-gray-600 hover:text-primary-500 font-medium transition duration-150">Pricing</a>
-            <a href="#gallery" className="text-gray-600 hover:text-primary-500 font-medium transition duration-150">Gallery</a>
-            <a href="#contact" className="text-gray-600 hover:text-primary-500 font-medium transition duration-150">Contact</a>
+            <a href="#services" className="text-gray-600 hover:text-blue-600 font-medium transition duration-150">Usługi</a>
+            <a href="#pricing" className="text-gray-600 hover:text-blue-600 font-medium transition duration-150">Cennik</a>
+            <a href="#gallery" className="text-gray-600 hover:text-blue-600 font-medium transition duration-150">Galeria</a>
+            <a href="#calendar" className="text-gray-600 hover:text-blue-600 font-medium transition duration-150">Kalendarz</a>
+            <a href="#contact" className="text-gray-600 hover:text-blue-600 font-medium transition duration-150">Kontakt</a>
+            <Link to="/admin/login" className="text-gray-800 hover:text-blue-600 font-medium transition duration-150 flex items-center">
+              <User className="h-4 w-4 mr-1" />
+              Admin
+            </Link>
           </nav>
           
           {/* Mobile Navigation Button */}
@@ -68,10 +74,10 @@ export default function Navbar() {
           {/* CTA Button */}
           <div className="hidden md:block">
             <Button 
-              className="bg-primary-500 text-white hover:bg-primary-600"
+              className="bg-orange-500 text-white hover:bg-orange-600"
               asChild
             >
-              <a href="#contact">Get a Quote</a>
+              <a href="#contact">Wycena</a>
             </Button>
           </div>
         </div>
@@ -82,38 +88,53 @@ export default function Navbar() {
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
           <a 
             href="#services" 
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary-500 hover:bg-gray-50"
+            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
             onClick={() => setIsMenuOpen(false)}
           >
-            Services
+            Usługi
           </a>
           <a 
             href="#pricing" 
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary-500 hover:bg-gray-50"
+            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
             onClick={() => setIsMenuOpen(false)}
           >
-            Pricing
+            Cennik
           </a>
           <a 
             href="#gallery" 
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary-500 hover:bg-gray-50"
+            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
             onClick={() => setIsMenuOpen(false)}
           >
-            Gallery
+            Galeria
+          </a>
+          <a 
+            href="#calendar" 
+            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Kalendarz
           </a>
           <a 
             href="#contact" 
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary-500 hover:bg-gray-50"
+            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
             onClick={() => setIsMenuOpen(false)}
           >
-            Contact
+            Kontakt
           </a>
+          <Link 
+            to="/admin/login" 
+            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 flex items-center"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            <User className="h-4 w-4 mr-1" />
+            Admin
+          </Link>
           <a 
             href="#contact" 
-            className="block px-3 py-2 rounded-md text-base font-medium text-white bg-primary-500 hover:bg-primary-600 mt-4"
+            className="block px-3 py-2 rounded-md text-base font-medium text-white bg-orange-500 hover:bg-orange-600 mt-4"
             onClick={() => setIsMenuOpen(false)}
           >
-            Get a Quote
+            Wycena
           </a>
         </div>
       </div>

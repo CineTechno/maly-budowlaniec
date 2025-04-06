@@ -1,7 +1,12 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContactRequestSchema, insertEstimateRequestSchema } from "@shared/schema";
+import { insertContactRequestSchema, insertEstimateRequestSchema, insertCalendarAvailabilitySchema } from "@shared/schema";
+import { scrypt, randomBytes, timingSafeEqual } from "crypto";
+import { promisify } from "util";
+import session from "express-session";
+import passport from "passport";
+import { Strategy as LocalStrategy } from "passport-local";
 import OpenAI from "openai";
 
 // Initialize OpenAI client
@@ -10,7 +15,188 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 // Log OpenAI availability for debugging
 console.log("OpenAI API Key available:", !!process.env.OPENAI_API_KEY);
 
+// Helper functions for password hashing
+const scryptAsync = promisify(scrypt);
+
+async function hashPassword(password: string) {
+  const salt = randomBytes(16).toString("hex");
+  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${buf.toString("hex")}.${salt}`;
+}
+
+async function comparePasswords(supplied: string, stored: string) {
+  const [hashed, salt] = stored.split(".");
+  const hashedBuf = Buffer.from(hashed, "hex");
+  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+  return timingSafeEqual(hashedBuf, suppliedBuf);
+}
+
+// Middleware to check if user is authenticated
+function isAuthenticated(req: Request, res: Response, next: NextFunction) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.status(401).json({ message: "Unauthorized" });
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup authentication
+  app.use(session({
+    secret: process.env.SESSION_SECRET || 'maly-budowlaniec-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+  }));
+  
+  app.use(passport.initialize());
+  app.use(passport.session());
+  
+  passport.use(new LocalStrategy(async (username, password, done) => {
+    try {
+      const user = await storage.getUserByUsername(username);
+      if (!user || !(await comparePasswords(password, user.password))) {
+        return done(null, false);
+      }
+      return done(null, user);
+    } catch (err) {
+      return done(err);
+    }
+  }));
+  
+  passport.serializeUser((user: any, done) => {
+    done(null, user.id);
+  });
+  
+  passport.deserializeUser(async (id: number, done) => {
+    try {
+      const user = await storage.getUser(id);
+      done(null, user);
+    } catch (err) {
+      done(err);
+    }
+  });
+  
+  // Authentication routes
+  app.post('/api/login', passport.authenticate('local'), (req, res) => {
+    res.json({ success: true, user: req.user });
+  });
+  
+  app.post('/api/logout', (req, res, next) => {
+    req.logout((err) => {
+      if (err) { return next(err); }
+      res.json({ success: true });
+    });
+  });
+  
+  app.get('/api/user', (req, res) => {
+    if (req.isAuthenticated()) {
+      res.json({ isAuthenticated: true, user: req.user });
+    } else {
+      res.json({ isAuthenticated: false });
+    }
+  });
+  
+  // Admin routes
+  app.get('/api/admin/contacts', isAuthenticated, async (req, res) => {
+    try {
+      const contacts = await storage.getContactRequests();
+      res.json(contacts);
+    } catch (error) {
+      console.error("Error fetching contacts:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  app.get('/api/admin/estimates', isAuthenticated, async (req, res) => {
+    try {
+      const estimates = await storage.getEstimateRequests();
+      res.json(estimates);
+    } catch (error) {
+      console.error("Error fetching estimates:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  // Calendar availability routes
+  app.get('/api/calendar', async (req, res) => {
+    try {
+      const date = req.query.date as string | undefined;
+      const availability = await storage.getCalendarAvailability(date);
+      res.json(availability);
+    } catch (error) {
+      console.error("Error fetching calendar availability:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  app.post('/api/admin/calendar', isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertCalendarAvailabilitySchema.parse(req.body);
+      const availability = await storage.createCalendarAvailability(validatedData);
+      res.status(201).json(availability);
+    } catch (error) {
+      console.error("Error creating calendar availability:", error);
+      res.status(400).json({ message: "Invalid calendar availability data" });
+    }
+  });
+  
+  app.put('/api/admin/calendar/:id', isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const availability = await storage.updateCalendarAvailability(id, req.body);
+      res.json(availability);
+    } catch (error) {
+      console.error("Error updating calendar availability:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  app.delete('/api/admin/calendar/:id', isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteCalendarAvailability(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting calendar availability:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  // Route to create initial admin user if none exists
+  app.post('/api/admin/setup', async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      // Check if users exist already
+      const usersExist = await storage.checkIfUsersExist();
+      
+      // If users already exist, only allow if authenticated as admin
+      if (usersExist && !req.isAuthenticated()) {
+        return res.status(403).send("Nie można utworzyć więcej kont administratora");
+      }
+      
+      // Check if username exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).send("Użytkownik o takiej nazwie już istnieje");
+      }
+      
+      // Create admin user
+      const hashedPassword = await hashPassword(password);
+      const user = await storage.createUser({
+        username,
+        password: hashedPassword
+      });
+      
+      res.status(201).json({ message: "Konto administratora utworzone pomyślnie", userId: user.id });
+    } catch (error) {
+      console.error("Error creating admin user:", error);
+      res.status(500).send("Wystąpił błąd podczas tworzenia konta administratora");
+    }
+  });
   // Contact form submission
   app.post("/api/contact", async (req, res) => {
     try {

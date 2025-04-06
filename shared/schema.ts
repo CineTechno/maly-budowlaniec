@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -53,5 +53,24 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type ContactRequest = typeof contactRequests.$inferSelect;
 export type InsertContactRequest = z.infer<typeof insertContactRequestSchema>;
 
+export const calendarAvailability = pgTable("calendar_availability", {
+  id: serial("id").primaryKey(),
+  date: text("date").notNull(),
+  start_time: text("start_time").notNull(),
+  end_time: text("end_time").notNull(),
+  is_available: boolean("is_available").notNull().default(true),
+  created_at: timestamp("created_at").defaultNow(),
+});
+
+export const insertCalendarAvailabilitySchema = createInsertSchema(calendarAvailability).pick({
+  date: true,
+  start_time: true,
+  end_time: true,
+  is_available: true,
+});
+
 export type EstimateRequest = typeof estimateRequests.$inferSelect;
 export type InsertEstimateRequest = z.infer<typeof insertEstimateRequestSchema>;
+
+export type CalendarAvailability = typeof calendarAvailability.$inferSelect;
+export type InsertCalendarAvailability = z.infer<typeof insertCalendarAvailabilitySchema>;

@@ -5,7 +5,10 @@ import { insertContactRequestSchema, insertEstimateRequestSchema } from "@shared
 import OpenAI from "openai";
 
 // Initialize OpenAI client
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sample_key" });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// Log OpenAI availability for debugging
+console.log("OpenAI API Key available:", !!process.env.OPENAI_API_KEY);
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Contact form submission
@@ -105,6 +108,11 @@ async function generatePriceEstimate(query: string): Promise<string> {
     return completion.choices[0].message.content || "Przepraszam, nie mogłem wygenerować wyceny. Proszę skontaktować się z nami bezpośrednio, aby uzyskać spersonalizowaną ofertę.";
   } catch (error) {
     console.error("Error calling OpenAI API:", error);
+    // Log more detailed error information
+    if (error instanceof Error) {
+      console.error(`Error name: ${error.name}, message: ${error.message}`);
+      console.error(`Error stack: ${error.stack}`);
+    }
     return "Przepraszam, mam problem z wygenerowaniem wyceny w tej chwili. Proszę spróbować ponownie później lub skontaktować się z nami bezpośrednio.";
   }
 }

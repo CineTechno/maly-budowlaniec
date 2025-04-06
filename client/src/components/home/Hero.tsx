@@ -32,10 +32,10 @@ export default function Hero() {
   return (
     <section 
       id="hero" 
-      className="relative pt-24 bg-primary-900"
+      className="relative pt-24 bg-blue-800"
       ref={ref}
     >
-      <div className="absolute inset-0 bg-gradient-to-r from-primary-800/95 to-primary-900/95"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-800/95 to-blue-900/95"></div>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-20 md:py-32">
         <motion.div
           variants={containerVariants}

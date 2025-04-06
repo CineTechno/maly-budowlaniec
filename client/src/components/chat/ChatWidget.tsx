@@ -15,7 +15,7 @@ export default function ChatWidget() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     { 
       role: "assistant", 
-      content: "Hi there! I'm your AI assistant. Describe your project, and I'll give you a price estimate."
+      content: "Witaj! Jestem Twoim asystentem AI. Opisz swój projekt, a przedstawię Ci szacunkową wycenę."
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,7 +58,7 @@ export default function ChatWidget() {
         ...prev, 
         { 
           role: "assistant", 
-          content: "Sorry, I'm having trouble generating an estimate right now. Please try again later."
+          content: "Przepraszam, mam problem z wygenerowaniem wyceny w tej chwili. Proszę spróbować ponownie później."
         }
       ]);
     } finally {
@@ -70,7 +70,7 @@ export default function ChatWidget() {
     <div className="fixed bottom-6 right-6 z-50">
       <Button
         onClick={toggleChat}
-        className={`rounded-full p-3 shadow-lg ${isOpen ? "bg-gray-700 hover:bg-gray-800" : "bg-primary-500 hover:bg-primary-600"}`}
+        className={`rounded-full p-3 shadow-lg ${isOpen ? "bg-gray-700 hover:bg-gray-800" : "bg-blue-600 hover:bg-blue-700"}`}
         size="icon"
         aria-label="Chat with us"
       >
@@ -86,9 +86,9 @@ export default function ChatWidget() {
             transition={{ duration: 0.2 }}
             className="absolute bottom-16 right-0 w-80 sm:w-96 bg-white rounded-lg shadow-xl overflow-hidden"
           >
-            <div className="p-4 bg-primary-500 text-white">
-              <h3 className="text-lg font-semibold">HandyPro Assistant</h3>
-              <p className="text-sm text-white/80">Get a quick price estimate</p>
+            <div className="p-4 bg-blue-600 text-white">
+              <h3 className="text-lg font-semibold">BudTeam Asystent</h3>
+              <p className="text-sm text-white/80">Uzyskaj szybką wycenę</p>
             </div>
             
             <div 
@@ -100,7 +100,7 @@ export default function ChatWidget() {
                   key={index} 
                   className={`${
                     message.role === "assistant" 
-                      ? "chat-bubble text-white bg-primary-500 p-3 rounded-lg rounded-bl-none max-w-[80%]" 
+                      ? "chat-bubble text-white bg-blue-600 p-3 rounded-lg rounded-bl-none max-w-[80%]" 
                       : "chat-bubble ml-auto bg-gray-200 p-3 rounded-lg rounded-br-none max-w-[80%]"
                   }`}
                 >
@@ -108,7 +108,7 @@ export default function ChatWidget() {
                 </div>
               ))}
               {isLoading && (
-                <div className="chat-bubble text-white bg-primary-500 p-3 rounded-lg rounded-bl-none max-w-[80%] flex items-center space-x-2">
+                <div className="chat-bubble text-white bg-blue-600 p-3 rounded-lg rounded-bl-none max-w-[80%] flex items-center space-x-2">
                   <div className="w-2 h-2 bg-white rounded-full animate-bounce delay-0"></div>
                   <div className="w-2 h-2 bg-white rounded-full animate-bounce delay-150"></div>
                   <div className="w-2 h-2 bg-white rounded-full animate-bounce delay-300"></div>
@@ -121,24 +121,25 @@ export default function ChatWidget() {
                 type="text"
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
-                placeholder="Describe your project..."
-                className="flex-1 border border-gray-300 rounded-l-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                placeholder="Opisz swój projekt..."
+                className="flex-1 border border-gray-300 rounded-l-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-600"
                 disabled={isLoading}
               />
               <Button
                 type="submit"
-                className="rounded-l-none bg-primary-500 hover:bg-primary-600"
+                className="rounded-l-none bg-blue-600 hover:bg-blue-700"
                 disabled={isLoading}
               >
                 <Send className="h-4 w-4" />
               </Button>
             </form>
             
-            <style jsx>{`
+            <style>
+              {`
               .chat-bubble {
                 position: relative;
               }
-              .chat-bubble.bg-primary-500:after {
+              .chat-bubble.bg-blue-600:after {
                 content: '';
                 position: absolute;
                 bottom: 0;
@@ -146,7 +147,7 @@ export default function ChatWidget() {
                 width: 0;
                 height: 0;
                 border: 10px solid transparent;
-                border-top-color: hsl(var(--primary));
+                border-top-color: #2563eb;
                 border-bottom: 0;
                 margin-left: -10px;
                 margin-bottom: -10px;
@@ -164,7 +165,8 @@ export default function ChatWidget() {
                 margin-right: -10px;
                 margin-bottom: -10px;
               }
-            `}</style>
+              `}
+            </style>
           </motion.div>
         )}
       </AnimatePresence>

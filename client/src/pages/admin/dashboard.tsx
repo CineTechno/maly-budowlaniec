@@ -12,6 +12,7 @@ import { pl } from "date-fns/locale";
 import type { ReactNode } from "react";
 import { CalendarForm } from "@/components/admin/calendar-form";
 import { ChatQueries } from "@/components/admin/chat-queries";
+import { ChatSessions } from "@/components/admin/chat-sessions";
 import { ContactRequests } from "@/components/admin/contact-requests";
 
 export default function AdminDashboard() {
@@ -55,9 +56,10 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className="grid w-full grid-cols-4 mb-8">
             <TabsTrigger value="calendar">Kalendarz dostępności</TabsTrigger>
             <TabsTrigger value="chat">Zapytania z czatu</TabsTrigger>
+            <TabsTrigger value="chat-sessions">Sesje konwersacji</TabsTrigger>
             <TabsTrigger value="contacts">Formularze kontaktowe</TabsTrigger>
           </TabsList>
           
@@ -72,6 +74,13 @@ export default function AdminDashboard() {
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-4">Historia zapytań z czatu</h2>
               <ChatQueries />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="chat-sessions">
+            <div className="bg-white p-6 rounded-lg shadow">
+              <h2 className="text-xl font-semibold mb-4">Pełne sesje konwersacji</h2>
+              <ChatSessions />
             </div>
           </TabsContent>
           

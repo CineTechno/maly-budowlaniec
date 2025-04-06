@@ -3,16 +3,25 @@ import { Button } from "@/components/ui/button";
 import { Send, MessageSquare, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
 
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
 }
 
+interface ChatSession {
+  id: number;
+  user_name: string;
+  chat_history: string;
+  total_messages: number;
+}
+
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [userName, setUserName] = useState("");
+  const [chatSessionId, setChatSessionId] = useState<number | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     { 
       role: "assistant", 
@@ -25,6 +34,34 @@ export default function ChatWidget() {
   const maxRequestsPerHour = 10;
   
   const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  // Load existing chat session if user has provided their name
+  const { data: chatSession } = useQuery<ChatSession>({
+    queryKey: ['chat-session', userName],
+    queryFn: async () => {
+      if (!userName.trim()) return null;
+      const response = await apiRequest('GET', `/api/chat-session/${encodeURIComponent(userName)}`);
+      if (response.status === 404) return null;
+      return response.json();
+    },
+    enabled: !!userName.trim(),
+  });
+
+  // Update chat messages when chat session is loaded
+  useEffect(() => {
+    if (chatSession) {
+      try {
+        const parsedHistory = JSON.parse(chatSession.chat_history) as ChatMessage[];
+        setChatMessages([
+          { role: "assistant", content: "Witaj ponownie! Kontynuujmy naszą rozmowę." },
+          ...parsedHistory
+        ]);
+        setChatSessionId(chatSession.id);
+      } catch (error) {
+        console.error("Error parsing chat history:", error);
+      }
+    }
+  }, [chatSession]);
   
   useEffect(() => {
     if (chatContainerRef.current && isOpen) {
@@ -64,21 +101,30 @@ export default function ChatWidget() {
     setChatInput("");
     
     // Add user message to chat
-    setChatMessages(prev => [...prev, { role: "user", content: userMessage }]);
+    const updatedMessages: ChatMessage[] = [...chatMessages, { role: "user", content: userMessage }];
+    setChatMessages(updatedMessages);
     
     setIsLoading(true);
     setRequestCount(prev => prev + 1);
     
     try {
-      // Send request to our API endpoint with name included
+      const previousMessages = updatedMessages.slice(1); // Exclude welcome message
+      
+      // Send request to our API endpoint with name and chat history
       const response = await apiRequest("POST", "/api/estimate", { 
         query: chatInput.trim(),
-        userName: userName.trim()
+        userName: userName.trim(),
+        chatHistory: previousMessages
       });
       const data = await response.json();
       
       // Add AI response to chat
-      setChatMessages(prev => [...prev, { role: "assistant", content: data.response }]);
+      const finalMessages: ChatMessage[] = [...updatedMessages, { role: "assistant", content: data.response }];
+      setChatMessages(finalMessages);
+      
+      // Store chat session
+      await storeChatSession(finalMessages.slice(1)); // Exclude welcome message
+      
     } catch (error) {
       console.error("Error getting estimate:", error);
       setChatMessages(prev => [
@@ -90,6 +136,31 @@ export default function ChatWidget() {
       ]);
     } finally {
       setIsLoading(false);
+    }
+  };
+  
+  // Store chat session in the database
+  const storeChatSession = async (messagesHistory: ChatMessage[]) => {
+    try {
+      if (chatSessionId) {
+        // Update existing session
+        await apiRequest("PUT", `/api/chat-session/${chatSessionId}`, {
+          chatHistory: JSON.stringify(messagesHistory),
+          totalMessages: messagesHistory.length
+        });
+      } else {
+        // Create new session
+        const response = await apiRequest("POST", "/api/chat-session", {
+          userName: userName.trim(),
+          chatHistory: JSON.stringify(messagesHistory),
+          totalMessages: messagesHistory.length
+        });
+        
+        const newSession = await response.json();
+        setChatSessionId(newSession.id);
+      }
+    } catch (error) {
+      console.error("Error storing chat session:", error);
     }
   };
   

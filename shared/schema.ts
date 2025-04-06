@@ -31,6 +31,21 @@ export const insertContactRequestSchema = createInsertSchema(contactRequests).pi
   message: true,
 });
 
+// Chat sessions table to store complete conversations
+export const chatSessions = pgTable("chat_sessions", {
+  id: serial("id").primaryKey(),
+  user_name: text("user_name").notNull(),
+  started_at: timestamp("started_at").defaultNow(),
+  chat_history: text("chat_history").notNull(), // JSON stringified chat history
+  total_messages: integer("total_messages").default(0),
+});
+
+export const insertChatSessionSchema = createInsertSchema(chatSessions).pick({
+  user_name: true,
+  chat_history: true,
+  total_messages: true,
+});
+
 export const estimateRequests = pgTable("estimate_requests", {
   id: serial("id").primaryKey(),
   query: text("query").notNull(),
@@ -38,6 +53,7 @@ export const estimateRequests = pgTable("estimate_requests", {
   user_name: text("user_name"),
   created_at: text("created_at").notNull(),
   ip_address: text("ip_address"),
+  chat_session_id: integer("chat_session_id").references(() => chatSessions.id),
 });
 
 export const insertEstimateRequestSchema = createInsertSchema(estimateRequests).pick({
@@ -45,6 +61,7 @@ export const insertEstimateRequestSchema = createInsertSchema(estimateRequests).
   response: true,
   user_name: true,
   ip_address: true,
+  chat_session_id: true,
 });
 
 export type User = typeof users.$inferSelect;
@@ -56,17 +73,15 @@ export type InsertContactRequest = z.infer<typeof insertContactRequestSchema>;
 export const calendarAvailability = pgTable("calendar_availability", {
   id: serial("id").primaryKey(),
   date: text("date").notNull(),
-  start_time: text("start_time").notNull(),
-  end_time: text("end_time").notNull(),
-  is_available: boolean("is_available").notNull().default(true),
+  status: text("status").notNull().default("niedostepny"), // "dostepny", "zajety", or "niedostepny"
   created_at: timestamp("created_at").defaultNow(),
+  updated_by: integer("updated_by").references(() => users.id),
 });
 
 export const insertCalendarAvailabilitySchema = createInsertSchema(calendarAvailability).pick({
   date: true,
-  start_time: true,
-  end_time: true,
-  is_available: true,
+  status: true,
+  updated_by: true,
 });
 
 export type EstimateRequest = typeof estimateRequests.$inferSelect;
@@ -74,3 +89,6 @@ export type InsertEstimateRequest = z.infer<typeof insertEstimateRequestSchema>;
 
 export type CalendarAvailability = typeof calendarAvailability.$inferSelect;
 export type InsertCalendarAvailability = z.infer<typeof insertCalendarAvailabilitySchema>;
+
+export type ChatSession = typeof chatSessions.$inferSelect;
+export type InsertChatSession = z.infer<typeof insertChatSessionSchema>;

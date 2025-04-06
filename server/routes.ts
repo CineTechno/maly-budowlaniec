@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContactRequestSchema, insertEstimateRequestSchema, insertCalendarAvailabilitySchema } from "@shared/schema";
+import { insertContactRequestSchema, insertEstimateRequestSchema, insertCalendarAvailabilitySchema, insertChatSessionSchema } from "@shared/schema";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import session from "express-session";
@@ -120,6 +120,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  app.get('/api/admin/chat-sessions', isAuthenticated, async (req, res) => {
+    try {
+      const chatSessions = await storage.getAllChatSessions();
+      res.json(chatSessions);
+    } catch (error) {
+      console.error("Error fetching chat sessions:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
   // Calendar availability routes
   app.get('/api/calendar', async (req, res) => {
     try {
@@ -209,6 +219,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Chat session routes
+  app.post("/api/chat-session", async (req, res) => {
+    try {
+      const validatedData = insertChatSessionSchema.parse(req.body);
+      const chatSession = await storage.createChatSession(validatedData);
+      res.status(201).json(chatSession);
+    } catch (error) {
+      console.error("Error creating chat session:", error);
+      res.status(400).json({ message: "Invalid chat session data" });
+    }
+  });
+  
+  app.get("/api/chat-session/:userName", async (req, res) => {
+    try {
+      const userName = req.params.userName;
+      const chatSession = await storage.getChatSessionByUserName(userName);
+      
+      if (!chatSession) {
+        return res.status(404).json({ message: "Chat session not found" });
+      }
+      
+      res.json(chatSession);
+    } catch (error) {
+      console.error("Error fetching chat session:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  app.put("/api/chat-session/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { chatHistory, totalMessages } = req.body;
+      
+      if (!chatHistory || typeof chatHistory !== "string" || !totalMessages || typeof totalMessages !== "number") {
+        return res.status(400).json({ message: "Invalid chat session data" });
+      }
+      
+      const chatSession = await storage.updateChatSession(id, chatHistory, totalMessages);
+      res.json(chatSession);
+    } catch (error) {
+      console.error("Error updating chat session:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
   // AI price estimator endpoint
   app.post("/api/estimate", async (req, res) => {
     try {
@@ -216,6 +271,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!query || typeof query !== "string") {
         return res.status(400).json({ message: "Invalid query parameter" });
+      }
+      
+      if (!userName || typeof userName !== "string") {
+        return res.status(400).json({ message: "Imię jest wymagane" }); // Name is required
+      }
+      
+      let chatSessionId = null;
+      let existingChatSession = await storage.getChatSessionByUserName(userName);
+      
+      // If user has an existing chat session, use it
+      if (existingChatSession) {
+        // Update the existing chat history
+        const currentHistory = JSON.parse(existingChatSession.chat_history);
+        const updatedHistory = Array.isArray(chatHistory) && chatHistory.length > 0 ? chatHistory : currentHistory;
+        
+        // Update the chat session
+        await storage.updateChatSession(
+          existingChatSession.id,
+          JSON.stringify(updatedHistory),
+          updatedHistory.length
+        );
+        
+        chatSessionId = existingChatSession.id;
+      } else {
+        // Create a new chat session
+        const initialHistory = Array.isArray(chatHistory) && chatHistory.length > 0 
+          ? chatHistory 
+          : [{ role: 'user', content: query }];
+          
+        const newChatSession = await storage.createChatSession({
+          user_name: userName,
+          chat_history: JSON.stringify(initialHistory),
+          total_messages: initialHistory.length
+        });
+        
+        chatSessionId = newChatSession.id;
       }
       
       // Generate response using OpenAI with chat history
@@ -228,11 +319,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createEstimateRequest({
         query,
         response,
-        user_name: userName || null,
-        ip_address: typeof ip_address === 'string' ? ip_address : null
+        user_name: userName,
+        ip_address: typeof ip_address === 'string' ? ip_address : null,
+        chat_session_id: chatSessionId
       });
       
-      res.status(200).json({ response });
+      // Update chat history with the new response
+      if (existingChatSession) {
+        const currentHistory = JSON.parse(existingChatSession.chat_history);
+        currentHistory.push({ role: 'user', content: query });
+        currentHistory.push({ role: 'assistant', content: response });
+        
+        await storage.updateChatSession(
+          existingChatSession.id,
+          JSON.stringify(currentHistory),
+          currentHistory.length
+        );
+      }
+      
+      res.status(200).json({ response, sessionId: chatSessionId });
     } catch (error) {
       console.error("Error generating estimate:", error);
       res.status(500).json({ message: "Error generating estimate" });

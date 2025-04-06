@@ -183,18 +183,6 @@ export default function Calendar() {
             )}
             
             <div className="mt-8 text-center">
-              <div className="flex flex-col justify-center items-center mb-4">
-                <div className="flex items-center mb-2">
-                  <div className="w-4 h-4 rounded-full bg-green-500 mr-2"></div>
-                  <span className="text-sm text-gray-700">Dostępny</span>
-                  
-                  <div className="w-4 h-4 rounded-full bg-orange-500 mx-4 mr-2"></div>
-                  <span className="text-sm text-gray-700">Zajęty</span>
-                  
-                  <div className="w-4 h-4 rounded-full bg-red-500 mx-4 mr-2"></div>
-                  <span className="text-sm text-gray-700">Niedostępny</span>
-                </div>
-              </div>
               <p className="text-gray-600">
                 Aby zarezerwować wizytę, zadzwoń do nas: <span className="font-semibold text-primary-700">+48 123 456 789</span>
               </p>

@@ -6,61 +6,52 @@ import { Badge } from "@/components/ui/badge";
 import { format, addDays } from "date-fns";
 import { pl } from "date-fns/locale";
 
-// This function generates random time slots for demonstration purposes
-interface TimeSlot {
-  startTime: string;
-  endTime: string;
-  available: boolean;
-}
+// Define status types for days
+type DayStatus = "dostepny" | "zajety" | "niedostepny";
 
-interface Availability {
-  [date: string]: TimeSlot[];
+interface DayAvailability {
+  [date: string]: DayStatus;
 }
-
-const generateAvailabilitySlots = (): TimeSlot[] => {
-  const timeSlots: TimeSlot[] = [];
-  const startTimes = [9, 10, 11, 12, 13, 14, 15, 16, 17];
-  
-  for (let i = 0; i < startTimes.length; i++) {
-    // Randomly decide if this time slot is available (70% chance of being available)
-    if (Math.random() < 0.7) {
-      timeSlots.push({
-        startTime: `${startTimes[i]}:00`,
-        endTime: `${startTimes[i] + 1}:00`,
-        available: true
-      });
-    }
-  }
-  
-  return timeSlots;
-};
 
 // Generate availability for the next 14 days
-const generateCalendarAvailability = (): Availability => {
-  const availability: Availability = {};
+const generateCalendarAvailability = (): DayAvailability => {
+  const availability: DayAvailability = {};
   const today = new Date();
   
   for (let i = 0; i < 14; i++) {
     const date = addDays(today, i);
     const dateStr = format(date, "yyyy-MM-dd");
+    const dayOfWeek = date.getDay();
     
-    // Don't generate slots for Sundays (day 0)
-    if (date.getDay() !== 0) {
-      availability[dateStr] = generateAvailabilitySlots();
+    // Assign statuses based on day of week and randomness
+    if (dayOfWeek === 0) {
+      // Sundays are always unavailable
+      availability[dateStr] = "niedostepny";
+    } else if (dayOfWeek === 6) {
+      // Saturdays are mostly busy
+      availability[dateStr] = Math.random() < 0.7 ? "zajety" : "dostepny";
     } else {
-      availability[dateStr] = []; // No availability on Sundays
+      // Weekdays have mixed availability
+      const random = Math.random();
+      if (random < 0.5) {
+        availability[dateStr] = "dostepny";
+      } else if (random < 0.8) {
+        availability[dateStr] = "zajety";
+      } else {
+        availability[dateStr] = "niedostepny";
+      }
     }
   }
   
   return availability;
 };
 
-const availability: Availability = generateCalendarAvailability();
+const availability: DayAvailability = generateCalendarAvailability();
 
 export default function Calendar() {
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [availableSlots, setAvailableSlots] = useState(
-    date ? availability[format(date, "yyyy-MM-dd")] || [] : []
+  const [selectedStatus, setSelectedStatus] = useState<DayStatus | undefined>(
+    date ? availability[format(date, "yyyy-MM-dd")] : undefined
   );
   
   const { ref, inView } = useInView({
@@ -72,15 +63,26 @@ export default function Calendar() {
     setDate(newDate);
     if (newDate) {
       const dateStr = format(newDate, "yyyy-MM-dd");
-      setAvailableSlots(availability[dateStr] || []);
+      setSelectedStatus(availability[dateStr]);
     } else {
-      setAvailableSlots([]);
+      setSelectedStatus(undefined);
     }
   };
 
-  const isSlotsAvailable = (day: Date) => {
+  // Helper functions for day status
+  const isDayDostepny = (day: Date): boolean => {
     const dateStr = format(day, "yyyy-MM-dd");
-    return availability[dateStr] && availability[dateStr].length > 0;
+    return availability[dateStr] === "dostepny";
+  };
+
+  const isDayZajety = (day: Date): boolean => {
+    const dateStr = format(day, "yyyy-MM-dd");
+    return availability[dateStr] === "zajety";
+  };
+
+  const isDayNiedostepny = (day: Date): boolean => {
+    const dateStr = format(day, "yyyy-MM-dd");
+    return availability[dateStr] === "niedostepny";
   };
 
   return (
@@ -124,10 +126,14 @@ export default function Calendar() {
                   day: "h-10 w-10 p-0 font-normal aria-selected:opacity-100",
                 }}
                 modifiers={{
-                  available: (day) => isSlotsAvailable(day),
+                  dostepny: (day) => isDayDostepny(day),
+                  zajety: (day) => isDayZajety(day),
+                  niedostepny: (day) => isDayNiedostepny(day)
                 }}
                 modifiersClassNames={{
-                  available: "font-bold text-primary-600 bg-primary-50",
+                  dostepny: "font-bold text-green-600 bg-green-50 border border-green-100",
+                  zajety: "font-bold text-orange-600 bg-orange-50 border border-orange-100",
+                  niedostepny: "font-bold text-red-600 bg-red-50 border border-red-100"
                 }}
                 disabled={{ before: new Date() }}
               />
@@ -141,32 +147,54 @@ export default function Calendar() {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <h3 className="text-xl font-semibold mb-4 text-gray-900">
-              {date ? `Dostępne godziny (${format(date, "d MMMM yyyy", { locale: pl })})` : "Wybierz datę, aby zobaczyć dostępne godziny"}
+              {date ? `Status (${format(date, "d MMMM yyyy", { locale: pl })})` : "Wybierz datę, aby zobaczyć status"}
             </h3>
             
-            {date && availableSlots.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {availableSlots.map((slot: TimeSlot, index: number) => (
-                  <div 
-                    key={index}
-                    className="bg-primary-50 border border-primary-100 text-primary-800 rounded-md p-3 text-center hover:bg-primary-100 cursor-pointer transition-colors"
-                  >
-                    {slot.startTime} - {slot.endTime}
-                  </div>
-                ))}
+            {date && selectedStatus ? (
+              <div className="mt-8 text-center">
+                <div className={`
+                  inline-block text-2xl font-bold p-6 rounded-lg mb-4
+                  ${selectedStatus === "dostepny" ? "bg-green-100 text-green-800 border-2 border-green-500" : 
+                    selectedStatus === "zajety" ? "bg-orange-100 text-orange-800 border-2 border-orange-500" : 
+                    "bg-red-100 text-red-800 border-2 border-red-500"}
+                `}>
+                  {selectedStatus === "dostepny" ? "Dostępny" : 
+                   selectedStatus === "zajety" ? "Zajęty" : 
+                   "Niedostępny"}
+                </div>
+                
+                <p className="mt-4 text-gray-700">
+                  {selectedStatus === "dostepny" ? 
+                    "W tym dniu możemy wykonać wszystkie usługi. Zadzwoń, aby umówić spotkanie." : 
+                   selectedStatus === "zajety" ? 
+                    "W tym dniu mamy ograniczoną dostępność. Zadzwoń, aby sprawdzić możliwości." : 
+                    "W tym dniu nie jesteśmy dostępni. Wybierz inny dzień."}
+                </p>
               </div>
             ) : date ? (
               <div className="text-center py-8 text-gray-500">
-                <p>Brak dostępnych terminów w tym dniu</p>
+                <p>Brak informacji o dostępności w tym dniu</p>
                 <p className="mt-2">Wybierz inną datę lub skontaktuj się z nami telefonicznie</p>
               </div>
             ) : (
               <div className="text-center py-8 text-gray-500">
-                <p>Wybierz datę w kalendarzu, aby zobaczyć dostępne godziny</p>
+                <p>Wybierz datę w kalendarzu, aby zobaczyć status dostępności</p>
               </div>
             )}
             
             <div className="mt-8 text-center">
+              <div className="flex flex-col justify-center items-center mb-4">
+                <div className="flex items-center mb-2">
+                  <div className="w-4 h-4 rounded-full bg-green-500 mr-2"></div>
+                  <span className="text-sm text-gray-700">Dostępny</span>
+                  
+                  <div className="w-4 h-4 rounded-full bg-orange-500 mx-4 mr-2"></div>
+                  <span className="text-sm text-gray-700">Zajęty</span>
+                  
+                  <div className="w-4 h-4 rounded-full bg-red-500 mx-4 mr-2"></div>
+                  <span className="text-sm text-gray-700">Niedostępny</span>
+                </div>
+              </div>
               <p className="text-gray-600">
                 Aby zarezerwować wizytę, zadzwoń do nas: <span className="font-semibold text-primary-700">+48 123 456 789</span>
               </p>

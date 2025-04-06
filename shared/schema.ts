@@ -35,12 +35,16 @@ export const estimateRequests = pgTable("estimate_requests", {
   id: serial("id").primaryKey(),
   query: text("query").notNull(),
   response: text("response").notNull(),
+  user_name: text("user_name"),
   created_at: text("created_at").notNull(),
+  ip_address: text("ip_address"),
 });
 
 export const insertEstimateRequestSchema = createInsertSchema(estimateRequests).pick({
   query: true,
   response: true,
+  user_name: true,
+  ip_address: true,
 });
 
 export type User = typeof users.$inferSelect;

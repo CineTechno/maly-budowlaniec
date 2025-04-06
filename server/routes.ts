@@ -26,7 +26,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI price estimator endpoint
   app.post("/api/estimate", async (req, res) => {
     try {
-      const { query } = req.body;
+      const { query, userName } = req.body;
       
       if (!query || typeof query !== "string") {
         return res.status(400).json({ message: "Invalid query parameter" });
@@ -35,10 +35,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate response using OpenAI
       const response = await generatePriceEstimate(query);
       
-      // Store the request and response
+      // Get client IP address
+      const ip_address = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+      
+      // Store the request and response with additional info
       await storage.createEstimateRequest({
         query,
-        response
+        response,
+        user_name: userName || null,
+        ip_address: typeof ip_address === 'string' ? ip_address : null
       });
       
       res.status(200).json({ response });

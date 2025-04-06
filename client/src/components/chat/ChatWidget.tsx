@@ -12,6 +12,7 @@ interface ChatMessage {
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
+  const [userName, setUserName] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     { 
       role: "assistant", 
@@ -19,6 +20,9 @@ export default function ChatWidget() {
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRateLimited, setIsRateLimited] = useState(false);
+  const [requestCount, setRequestCount] = useState(0);
+  const maxRequestsPerHour = 10;
   
   const chatContainerRef = useRef<HTMLDivElement>(null);
   
@@ -28,6 +32,19 @@ export default function ChatWidget() {
     }
   }, [chatMessages, isOpen]);
   
+  // Reset rate limit after an hour
+  useEffect(() => {
+    if (requestCount >= maxRequestsPerHour) {
+      setIsRateLimited(true);
+      const timer = setTimeout(() => {
+        setRequestCount(0);
+        setIsRateLimited(false);
+      }, 60 * 60 * 1000); // 1 hour
+      
+      return () => clearTimeout(timer);
+    }
+  }, [requestCount]);
+  
   const toggleChat = () => {
     setIsOpen(!isOpen);
   };
@@ -35,19 +52,29 @@ export default function ChatWidget() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!chatInput.trim()) return;
+    if (!chatInput.trim() || !userName.trim() || isRateLimited) return;
     
-    const userMessage = chatInput.trim();
+    // Check rate limiting
+    if (requestCount >= maxRequestsPerHour) {
+      setIsRateLimited(true);
+      return;
+    }
+    
+    const userMessage = `${userName}: ${chatInput.trim()}`;
     setChatInput("");
     
     // Add user message to chat
     setChatMessages(prev => [...prev, { role: "user", content: userMessage }]);
     
     setIsLoading(true);
+    setRequestCount(prev => prev + 1);
     
     try {
-      // Send request to our API endpoint
-      const response = await apiRequest("POST", "/api/estimate", { query: userMessage });
+      // Send request to our API endpoint with name included
+      const response = await apiRequest("POST", "/api/estimate", { 
+        query: chatInput.trim(),
+        userName: userName.trim()
+      });
       const data = await response.json();
       
       // Add AI response to chat
@@ -100,7 +127,7 @@ export default function ChatWidget() {
                   key={index} 
                   className={`${
                     message.role === "assistant" 
-                      ? "chat-bubble text-gray-800 bg-gray-100 p-3 rounded-lg rounded-bl-none max-w-[80%]" 
+                      ? "chat-bubble text-gray-800 bg-gray-300 p-3 rounded-lg rounded-bl-none max-w-[80%] border border-gray-400" 
                       : "chat-bubble ml-auto bg-gray-200 p-3 rounded-lg rounded-br-none max-w-[80%]"
                   }`}
                 >
@@ -108,7 +135,7 @@ export default function ChatWidget() {
                 </div>
               ))}
               {isLoading && (
-                <div className="chat-bubble text-gray-800 bg-gray-100 p-3 rounded-lg rounded-bl-none max-w-[80%] flex items-center space-x-2">
+                <div className="chat-bubble text-gray-800 bg-gray-300 p-3 rounded-lg rounded-bl-none max-w-[80%] flex items-center space-x-2 border border-gray-400">
                   <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce delay-0"></div>
                   <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce delay-150"></div>
                   <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce delay-300"></div>
@@ -116,22 +143,48 @@ export default function ChatWidget() {
               )}
             </div>
             
-            <form onSubmit={handleSubmit} className="p-4 border-t border-gray-200 flex">
-              <input
-                type="text"
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                placeholder="Opisz swój projekt..."
-                className="flex-1 border border-gray-300 rounded-l-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-600"
-                disabled={isLoading}
-              />
-              <Button
-                type="submit"
-                className="rounded-l-none bg-blue-600 hover:bg-blue-700"
-                disabled={isLoading}
-              >
-                <Send className="h-4 w-4" />
-              </Button>
+            <div className="p-2 border-t border-gray-200 bg-gray-50">
+              <p className="text-xs text-gray-600 px-2 py-1">
+                Proszę napisać typ usługi, metraż pomieszczenia, typ materiału i wszystkie inne informacje które pomogą nam w wycenie. Maksymalnie 300 znaków.
+              </p>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="p-4 border-t border-gray-200 flex flex-col gap-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  placeholder="Twoje imię..."
+                  className="w-1/3 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                  disabled={isLoading}
+                  required
+                />
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value.slice(0, 300))}
+                  placeholder="Opisz swój projekt..."
+                  className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                  disabled={isLoading}
+                  maxLength={300}
+                  required
+                />
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-500">{chatInput.length}/300 znaków</span>
+                <Button
+                  type="submit"
+                  className="bg-blue-600 hover:bg-blue-700"
+                  disabled={isLoading || !userName.trim() || !chatInput.trim() || isRateLimited}
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  Wyślij
+                </Button>
+              </div>
+              {isRateLimited && (
+                <p className="text-xs text-red-500 mt-1">Przekroczono limit 10 zapytań na godzinę. Spróbuj ponownie później.</p>
+              )}
             </form>
             
             <style>
@@ -139,7 +192,7 @@ export default function ChatWidget() {
               .chat-bubble {
                 position: relative;
               }
-              .chat-bubble.bg-gray-100:after {
+              .chat-bubble.bg-gray-300:after {
                 content: '';
                 position: absolute;
                 bottom: 0;
@@ -147,7 +200,7 @@ export default function ChatWidget() {
                 width: 0;
                 height: 0;
                 border: 10px solid transparent;
-                border-top-color: #f3f4f6;
+                border-top-color: #d1d5db;
                 border-bottom: 0;
                 margin-left: -10px;
                 margin-bottom: -10px;

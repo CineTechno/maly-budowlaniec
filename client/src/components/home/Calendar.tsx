@@ -100,7 +100,7 @@ export default function Calendar() {
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch h-[600px]">
           <motion.div 
-            className="bg-white rounded-lg shadow-md overflow-hidden p-6 flex flex-col h-full"
+            className="bg-white rounded-lg border border-primary-300 shadow-md overflow-hidden p-6 flex flex-col h-full"
             initial={{ opacity: 0, x: -20 }}
             animate={inView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
             transition={{ duration: 0.6, delay: 0.1 }}
@@ -112,7 +112,7 @@ export default function Calendar() {
                 selected={date}
                 onSelect={handleDateSelect}
                 locale={pl}
-                className="rounded-md border w-full flex-grow"
+                className="w-full flex-grow"
                 classNames={{
                   root: "h-full flex flex-col",
                   months: "flex-grow",
@@ -130,21 +130,12 @@ export default function Calendar() {
                   available: "font-bold text-primary-600 bg-primary-50",
                 }}
                 disabled={{ before: new Date() }}
-                footer={
-                  <div className="text-sm text-center mt-4 text-gray-500">
-                    <div className="flex items-center justify-center space-x-2">
-                      <Badge variant="outline" className="border-primary-600 text-primary-600 bg-primary-50">
-                        Dostępne terminy
-                      </Badge>
-                    </div>
-                  </div>
-                }
               />
             </div>
           </motion.div>
           
           <motion.div 
-            className="bg-white rounded-lg shadow-md overflow-hidden p-6 flex flex-col h-full"
+            className="bg-white rounded-lg border border-primary-300 shadow-md overflow-hidden p-6 flex flex-col h-full"
             initial={{ opacity: 0, x: 20 }}
             animate={inView ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }}
             transition={{ duration: 0.6, delay: 0.2 }}

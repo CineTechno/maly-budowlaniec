@@ -140,10 +140,17 @@ export default function Pricing() {
     setQueryCount(prev => prev + 1);
     
     try {
-      // Send request to our API endpoint
+      // Filter out initial bot message and get all the relevant conversation history
+      const relevantChatHistory = chatMessages.filter(message => 
+        // Skip the very first bot greeting
+        !(message.role === "assistant" && message.content.includes("Witaj! Jestem Twoim asystentem AI"))
+      );
+      
+      // Send request to our API endpoint with full chat history
       const response = await apiRequest("POST", "/api/estimate", { 
         query: userMessage,
-        userName: userName
+        userName: userName,
+        chatHistory: relevantChatHistory
       });
       const data = await response.json();
       

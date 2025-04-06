@@ -212,14 +212,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI price estimator endpoint
   app.post("/api/estimate", async (req, res) => {
     try {
-      const { query, userName } = req.body;
+      const { query, userName, chatHistory } = req.body;
       
       if (!query || typeof query !== "string") {
         return res.status(400).json({ message: "Invalid query parameter" });
       }
       
-      // Generate response using OpenAI
-      const response = await generatePriceEstimate(query);
+      // Generate response using OpenAI with chat history
+      const response = await generatePriceEstimate(query, chatHistory);
       
       // Get client IP address
       const ip_address = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
@@ -243,7 +243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   return httpServer;
 }
 
-async function generatePriceEstimate(query: string): Promise<string> {
+async function generatePriceEstimate(query: string, chatHistory?: { role: 'user' | 'assistant', content: string }[]): Promise<string> {
   try {
     // Set up pricing data to ground the model's responses in realistic pricing
     const serviceInfo = `
@@ -268,31 +268,56 @@ async function generatePriceEstimate(query: string): Promise<string> {
       - Tynkowanie: 70 zł za m²
     `;
     
+    // Prepare message array for the API call
+    const systemMessage = {
+      role: "system" as const,
+      content: `Jesteś asystentem wycen dla polskiej firmy remontowo-budowlanej "Mały Budowlaniec". Twoim zadaniem jest dostarczanie wycen projektów remontowych i budowlanych na podstawie opisu klienta.
+      
+      ${serviceInfo}
+      
+      W odpowiedzi zawsze:
+      1. Pamiętaj wszystkie informacje podane wcześniej przez klienta, łącz je i twórz kompletny obraz projektu
+      2. Pokaż listę usług potrzebnych do wykonania zadania w formie tabeli: "Usługa: Cena × Ilość = Koszt całkowity"
+      3. Po liście usług, podaj łączny koszt wszystkich prac, np. "SUMA: 1245 zł"
+      4. Jeśli klient nie podał wystarczających informacji, poproś o konkretne szczegóły potrzebne do dokładnej wyceny
+      5. Bądź uprzejmy i profesjonalny. Nie podawaj wycen usług spoza naszego zakresu
+      6. Zawsze używaj złotych (zł) jako jednostki walutowej
+      7. Komunikuj się wyłącznie po polsku
+      8. Jeśli masz już wszystkie potrzebne informacje, podaj wycenę nawet jeśli klient dodał tylko małą ilość dodatkowych danych
+      
+      Odpowiedź musi zawierać listę potrzebnych usług, jedna pod drugą, z cenami i obliczeniem łącznego kosztu (cena × ilość), a na końcu SUMĘ wszystkich kosztów.`
+    };
+
+    // Create an array with the appropriate OpenAI message structure
+    type OpenAIMessage = {
+      role: "system" | "user" | "assistant";
+      content: string;
+    };
+
+    let messages: OpenAIMessage[] = [systemMessage];
+
+    // Add chat history if provided
+    if (chatHistory && Array.isArray(chatHistory) && chatHistory.length > 0) {
+      // Filter out only valid messages and convert to OpenAI format
+      const validMessages = chatHistory.filter(msg => 
+        msg && typeof msg === 'object' && 
+        (msg.role === 'user' || msg.role === 'assistant') &&
+        typeof msg.content === 'string'
+      ) as OpenAIMessage[];
+      
+      messages = [...messages, ...validMessages];
+    }
+
+    // Add the current query as the last user message
+    messages.push({
+      role: "user",
+      content: query
+    });
+    
     // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: `Jesteś asystentem wycen dla polskiej firmy remontowo-budowlanej "BudTeam". Twoim zadaniem jest dostarczanie wycen projektów remontowych i budowlanych na podstawie opisu klienta.
-          
-          ${serviceInfo}
-          
-          W odpowiedzi zawsze:
-          1. Pokaż listę usług potrzebnych do wykonania zadania w formie tabeli: "Usługa: Cena × Ilość = Koszt całkowity"
-          2. Po liście usług, podaj łączny koszt wszystkich prac, np. "SUMA: 1245 zł"
-          3. Jeśli klient nie podał wystarczających informacji, poproś o szczegóły potrzebne do dokładnej wyceny
-          4. Bądź uprzejmy i profesjonalny. Nie podawaj wycen usług spoza naszego zakresu
-          5. Zawsze używaj złotych (zł) jako jednostki walutowej
-          6. Komunikuj się wyłącznie po polsku
-          
-          Odpowiedź musi zawierać listę potrzebnych usług, jedna pod drugą, z cenami i obliczeniem łącznego kosztu (cena × ilość), a na końcu SUMĘ wszystkich kosztów.`
-        },
-        {
-          role: "user",
-          content: query
-        }
-      ],
+      messages: messages,
       max_tokens: 500,
     });
     

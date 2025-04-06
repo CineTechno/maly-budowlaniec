@@ -9,6 +9,8 @@ import {
   type EstimateRequest,
   type InsertEstimateRequest
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -22,65 +24,57 @@ export interface IStorage {
   getEstimateRequests(): Promise<EstimateRequest[]>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private contactRequests: Map<number, ContactRequest>;
-  private estimateRequests: Map<number, EstimateRequest>;
-  
-  userCurrentId: number;
-  contactRequestCurrentId: number;
-  estimateRequestCurrentId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.contactRequests = new Map();
-    this.estimateRequests = new Map();
-    
-    this.userCurrentId = 1;
-    this.contactRequestCurrentId = 1;
-    this.estimateRequestCurrentId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.userCurrentId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
     return user;
   }
   
   async createContactRequest(insertRequest: InsertContactRequest): Promise<ContactRequest> {
-    const id = this.contactRequestCurrentId++;
     const created_at = new Date().toISOString();
-    const contactRequest: ContactRequest = { ...insertRequest, id, created_at };
-    this.contactRequests.set(id, contactRequest);
+    const [contactRequest] = await db
+      .insert(contactRequests)
+      .values({
+        ...insertRequest,
+        created_at
+      })
+      .returning();
     return contactRequest;
   }
   
   async getContactRequests(): Promise<ContactRequest[]> {
-    return Array.from(this.contactRequests.values());
+    return await db.select().from(contactRequests);
   }
   
   async createEstimateRequest(insertRequest: InsertEstimateRequest): Promise<EstimateRequest> {
-    const id = this.estimateRequestCurrentId++;
     const created_at = new Date().toISOString();
-    const estimateRequest: EstimateRequest = { ...insertRequest, id, created_at };
-    this.estimateRequests.set(id, estimateRequest);
+    const [estimateRequest] = await db
+      .insert(estimateRequests)
+      .values({
+        ...insertRequest,
+        created_at
+      })
+      .returning();
     return estimateRequest;
   }
   
   async getEstimateRequests(): Promise<EstimateRequest[]> {
-    return Array.from(this.estimateRequests.values());
+    return await db.select().from(estimateRequests);
   }
 }
 
-export const storage = new MemStorage();
+// Switch from MemStorage to DatabaseStorage
+export const storage = new DatabaseStorage();

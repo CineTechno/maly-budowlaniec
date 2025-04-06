@@ -111,7 +111,7 @@ export default function ChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ duration: 0.2 }}
-            className="absolute bottom-16 right-0 w-80 sm:w-96 bg-white rounded-lg shadow-xl overflow-hidden"
+            className="absolute bottom-16 right-0 w-80 sm:w-96 bg-gray-100 rounded-lg shadow-xl overflow-hidden"
           >
             <div className="p-4 bg-blue-600 text-white">
               <h3 className="text-lg font-semibold">BudTeam Asystent</h3>
@@ -127,7 +127,7 @@ export default function ChatWidget() {
                   key={index} 
                   className={`${
                     message.role === "assistant" 
-                      ? "chat-bubble text-gray-800 bg-gray-300 p-3 rounded-lg rounded-bl-none max-w-[80%] border border-gray-400" 
+                      ? "chat-bubble text-gray-800 bg-orange-200 p-3 rounded-lg rounded-bl-none max-w-[80%] border border-orange-300" 
                       : "chat-bubble ml-auto bg-gray-200 p-3 rounded-lg rounded-br-none max-w-[80%]"
                   }`}
                 >
@@ -135,7 +135,7 @@ export default function ChatWidget() {
                 </div>
               ))}
               {isLoading && (
-                <div className="chat-bubble text-gray-800 bg-gray-300 p-3 rounded-lg rounded-bl-none max-w-[80%] flex items-center space-x-2 border border-gray-400">
+                <div className="chat-bubble text-gray-800 bg-orange-200 p-3 rounded-lg rounded-bl-none max-w-[80%] flex items-center space-x-2 border border-orange-300">
                   <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce delay-0"></div>
                   <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce delay-150"></div>
                   <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce delay-300"></div>
@@ -192,7 +192,7 @@ export default function ChatWidget() {
               .chat-bubble {
                 position: relative;
               }
-              .chat-bubble.bg-gray-300:after {
+              .chat-bubble.bg-orange-200:after {
                 content: '';
                 position: absolute;
                 bottom: 0;
@@ -200,7 +200,7 @@ export default function ChatWidget() {
                 width: 0;
                 height: 0;
                 border: 10px solid transparent;
-                border-top-color: #d1d5db;
+                border-top-color: #fed7aa;
                 border-bottom: 0;
                 margin-left: -10px;
                 margin-bottom: -10px;

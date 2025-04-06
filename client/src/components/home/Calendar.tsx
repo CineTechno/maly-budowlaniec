@@ -98,9 +98,9 @@ export default function Calendar() {
           </p>
         </motion.div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
           <motion.div 
-            className="bg-white rounded-lg shadow-md overflow-hidden p-6"
+            className="bg-white rounded-lg shadow-md overflow-hidden p-6 flex flex-col h-full"
             initial={{ opacity: 0, x: -20 }}
             animate={inView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
             transition={{ duration: 0.6, delay: 0.1 }}
@@ -111,7 +111,7 @@ export default function Calendar() {
               selected={date}
               onSelect={handleDateSelect}
               locale={pl}
-              className="rounded-md border"
+              className="rounded-md border w-full"
               modifiers={{
                 available: (day) => isSlotsAvailable(day),
               }}
@@ -132,7 +132,7 @@ export default function Calendar() {
           </motion.div>
           
           <motion.div 
-            className="bg-white rounded-lg shadow-md overflow-hidden p-6"
+            className="bg-white rounded-lg shadow-md overflow-hidden p-6 flex flex-col h-full"
             initial={{ opacity: 0, x: 20 }}
             animate={inView ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }}
             transition={{ duration: 0.6, delay: 0.2 }}

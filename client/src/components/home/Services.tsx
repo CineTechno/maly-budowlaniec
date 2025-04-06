@@ -12,38 +12,38 @@ interface Service {
 const services: Service[] = [
   {
     id: 1,
-    title: "General Repairs",
-    description: "Fixing everything from leaky faucets to damaged drywall, ensuring your home stays in perfect condition.",
+    title: "Naprawy Ogólne",
+    description: "Naprawiamy wszystko od cieknących kranów po uszkodzone ściany, dbając o idealny stan Twojego domu.",
     imageUrl: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
   },
   {
     id: 2,
-    title: "Kitchen Remodeling",
-    description: "Transform your kitchen with custom cabinetry, countertops, and appliance installation to match your style.",
+    title: "Remonty Kuchni",
+    description: "Przekształć swoją kuchnię dzięki niestandardowym szafkom, blatom i instalacji urządzeń pasujących do Twojego stylu.",
     imageUrl: "https://images.unsplash.com/photo-1609766857041-ed402ea8e2c2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
   },
   {
     id: 3,
-    title: "Bathroom Renovations",
-    description: "Create a spa-like retreat with modern fixtures, custom tile work, and efficient layouts.",
+    title: "Remonty Łazienek",
+    description: "Stwórz domowe spa z nowoczesnymi armaturami, niestandardowymi płytkami i efektywnym układem przestrzeni.",
     imageUrl: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
   },
   {
     id: 4,
-    title: "Tiling Services",
-    description: "Expert installation of ceramic, porcelain, and natural stone tiles for floors, walls, and backsplashes.",
+    title: "Usługi Płytkarskie",
+    description: "Profesjonalny montaż płytek ceramicznych, porcelanowych i kamienia naturalnego na podłogi, ściany i backsplashe.",
     imageUrl: "https://images.unsplash.com/photo-1575652479744-42e58ef3d906?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
   },
   {
     id: 5,
-    title: "Electrical Work",
-    description: "Light electrical services including fixture installation, outlet repairs, and lighting upgrades.",
+    title: "Prace Elektryczne",
+    description: "Lekkie usługi elektryczne, w tym montaż opraw, naprawa gniazdek i modernizacja oświetlenia.",
     imageUrl: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
   },
   {
     id: 6,
-    title: "Outdoor Services",
-    description: "Deck building, fence installation, and landscaping to enhance your outdoor living spaces.",
+    title: "Usługi Zewnętrzne",
+    description: "Budowa tarasów, montaż ogrodzeń i aranżacja krajobrazu, aby ulepszyć Twoją przestrzeń na świeżym powietrzu.",
     imageUrl: "https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
   }
 ];
@@ -84,9 +84,9 @@ export default function Services() {
           animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Our Services</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Nasze Usługi</h2>
           <p className="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">
-            From minor home repairs to complete renovations, our skilled team does it all
+            Od drobnych napraw domowych po kompletne remonty, nasz wykwalifikowany zespół zajmie się wszystkim
           </p>
         </motion.div>
         
@@ -118,7 +118,7 @@ export default function Services() {
                   href="#contact" 
                   className="mt-4 inline-flex items-center text-primary-500 hover:text-primary-600 font-medium"
                 >
-                  Learn more
+                  Dowiedz się więcej
                   <ChevronRight className="ml-1 h-4 w-4" />
                 </a>
               </div>
@@ -126,22 +126,7 @@ export default function Services() {
           ))}
         </motion.div>
         
-        <motion.div 
-          className="mt-16 text-center"
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : { opacity: 0 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
-        >
-          <a 
-            href="#pricing" 
-            className="inline-flex items-center px-6 py-3 bg-primary-500 text-white font-medium rounded-md shadow-lg hover:bg-primary-600 transition duration-300"
-          >
-            View Our Pricing
-            <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </a>
-        </motion.div>
+
       </div>
     </section>
   );

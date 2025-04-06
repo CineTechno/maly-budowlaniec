@@ -100,7 +100,7 @@ export default function ChatWidget() {
                   key={index} 
                   className={`${
                     message.role === "assistant" 
-                      ? "chat-bubble text-white bg-blue-600 p-3 rounded-lg rounded-bl-none max-w-[80%]" 
+                      ? "chat-bubble text-gray-800 bg-gray-100 p-3 rounded-lg rounded-bl-none max-w-[80%]" 
                       : "chat-bubble ml-auto bg-gray-200 p-3 rounded-lg rounded-br-none max-w-[80%]"
                   }`}
                 >
@@ -108,10 +108,10 @@ export default function ChatWidget() {
                 </div>
               ))}
               {isLoading && (
-                <div className="chat-bubble text-white bg-blue-600 p-3 rounded-lg rounded-bl-none max-w-[80%] flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-white rounded-full animate-bounce delay-0"></div>
-                  <div className="w-2 h-2 bg-white rounded-full animate-bounce delay-150"></div>
-                  <div className="w-2 h-2 bg-white rounded-full animate-bounce delay-300"></div>
+                <div className="chat-bubble text-gray-800 bg-gray-100 p-3 rounded-lg rounded-bl-none max-w-[80%] flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce delay-0"></div>
+                  <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce delay-150"></div>
+                  <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce delay-300"></div>
                 </div>
               )}
             </div>
@@ -139,7 +139,7 @@ export default function ChatWidget() {
               .chat-bubble {
                 position: relative;
               }
-              .chat-bubble.bg-blue-600:after {
+              .chat-bubble.bg-gray-100:after {
                 content: '';
                 position: absolute;
                 bottom: 0;
@@ -147,7 +147,7 @@ export default function ChatWidget() {
                 width: 0;
                 height: 0;
                 border: 10px solid transparent;
-                border-top-color: #2563eb;
+                border-top-color: #f3f4f6;
                 border-bottom: 0;
                 margin-left: -10px;
                 margin-bottom: -10px;

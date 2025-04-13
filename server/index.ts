@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { User } from "@shared/schema";
 
+
 // Type declarations for passport session
 declare global {
   namespace Express {

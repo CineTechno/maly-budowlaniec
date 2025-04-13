@@ -13,13 +13,13 @@ export default defineConfig(async () => ({
   plugins: [
     react(),
     runtimeErrorOverlay(),
-    themePlugin(),
-    ...(process.env.NODE_ENV !== "production" && process.env.REPL_ID !== undefined
-        ? [
-          (await import("@replit/vite-plugin-cartographer")).cartographer(),
-        ]
-        : []),
+    themePlugin()
   ],
+  server: {
+    proxy: {
+      "/api":'http://localhost:5000', // or wherever your backend runs
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "client", "src"),

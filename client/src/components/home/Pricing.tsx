@@ -5,62 +5,7 @@ import { Send, AlertCircle, Info } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
-interface PricingItem {
-  id: number;
-  service: string;
-  price: string;
-  unit: string;
-  category: string;
-}
-
-const pricingItems: PricingItem[] = [
-  // Naprawy i usługi podstawowe
-  { id: 1, service: "Podstawowe usługi", price: "90 zł", unit: "za godzinę", category: "podstawowe" },
-  { id: 2, service: "Naprawa płyt gipsowo-kartonowych", price: "200 zł", unit: "za miejsce", category: "podstawowe" },
-  { id: 3, service: "Montaż oświetlenia", price: "150 zł", unit: "za punkt", category: "podstawowe" },
-  { id: 4, service: "Malowanie wnętrz", price: "30 zł", unit: "za m²", category: "podstawowe" },
-  { id: 5, service: "Montaż szafek", price: "250 zł", unit: "za szafkę", category: "podstawowe" },
-  { id: 6, service: "Naprawa zamków", price: "120 zł", unit: "za sztukę", category: "podstawowe" },
-  { id: 7, service: "Montaż karniszy", price: "80 zł", unit: "za sztukę", category: "podstawowe" },
-  { id: 8, service: "Wymiana gniazdek/włączników", price: "60 zł", unit: "za sztukę", category: "podstawowe" },
-  
-  // Kuchnie i łazienki
-  { id: 9, service: "Remont kuchni (mała)", price: "10 000 zł", unit: "od", category: "kuchnie-lazienki" },
-  { id: 10, service: "Remont kuchni (duża)", price: "20 000 zł", unit: "od", category: "kuchnie-lazienki" },
-  { id: 11, service: "Remont łazienki (mała)", price: "8 000 zł", unit: "od", category: "kuchnie-lazienki" },
-  { id: 12, service: "Remont łazienki (duża)", price: "15 000 zł", unit: "od", category: "kuchnie-lazienki" },
-  { id: 13, service: "Montaż kabiny prysznicowej", price: "500 zł", unit: "od", category: "kuchnie-lazienki" },
-  { id: 14, service: "Montaż wanny", price: "450 zł", unit: "od", category: "kuchnie-lazienki" },
-  { id: 15, service: "Montaż umywalki", price: "300 zł", unit: "od", category: "kuchnie-lazienki" },
-  { id: 16, service: "Montaż toalety", price: "350 zł", unit: "od", category: "kuchnie-lazienki" },
-  
-  // Prace wykończeniowe
-  { id: 17, service: "Układanie płytek", price: "120 zł", unit: "za m²", category: "wykonczeniowe" },
-  { id: 18, service: "Wymiana drzwi wewnętrznych", price: "350 zł", unit: "za sztukę", category: "wykonczeniowe" },
-  { id: 19, service: "Wymiana okien", price: "800 zł", unit: "za m²", category: "wykonczeniowe" },
-  { id: 20, service: "Montaż paneli podłogowych", price: "60 zł", unit: "za m²", category: "wykonczeniowe" },
-  { id: 21, service: "Układanie parkietu", price: "120 zł", unit: "za m²", category: "wykonczeniowe" },
-  { id: 22, service: "Tynkowanie", price: "70 zł", unit: "za m²", category: "wykonczeniowe" },
-  { id: 23, service: "Szpachlowanie", price: "40 zł", unit: "za m²", category: "wykonczeniowe" },
-  { id: 24, service: "Tapetowanie", price: "50 zł", unit: "za m²", category: "wykonczeniowe" },
-  
-  // Instalacje
-  { id: 25, service: "Instalacja elektryczna", price: "100 zł", unit: "za punkt", category: "instalacje" },
-  { id: 26, service: "Instalacja hydrauliczna", price: "150 zł", unit: "za punkt", category: "instalacje" },
-  { id: 27, service: "Montaż ogrzewania podłogowego", price: "200 zł", unit: "za m²", category: "instalacje" },
-  { id: 28, service: "Wymiana grzejników", price: "300 zł", unit: "za sztukę", category: "instalacje" },
-  { id: 29, service: "Instalacja odkurzacza centralnego", price: "3 000 zł", unit: "od", category: "instalacje" },
-  { id: 30, service: "Instalacja klimatyzacji", price: "3 500 zł", unit: "od", category: "instalacje" },
-  
-  // Prace zewnętrzne
-  { id: 31, service: "Montaż ogrodzenia", price: "200 zł", unit: "za mb", category: "zewnetrzne" },
-  { id: 32, service: "Budowa tarasu", price: "400 zł", unit: "za m²", category: "zewnetrzne" },
-  { id: 33, service: "Układanie kostki brukowej", price: "150 zł", unit: "za m²", category: "zewnetrzne" },
-  { id: 34, service: "Montaż rynien", price: "90 zł", unit: "za mb", category: "zewnetrzne" },
-  { id: 35, service: "Montaż drzwi zewnętrznych", price: "700 zł", unit: "za sztukę", category: "zewnetrzne" },
-  { id: 36, service: "Instalacja oświetlenia ogrodowego", price: "150 zł", unit: "za punkt", category: "zewnetrzne" }
-];
+import {pricingItems} from "@/lib/pricingItems.tsx";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -70,6 +15,7 @@ interface ChatMessage {
 export default function Pricing() {
   const [chatInput, setChatInput] = useState("");
   const [userName, setUserName] = useState("");
+  const [userId, setUserId] = useState(1243534523423523);
   const [userNameSubmitted, setUserNameSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [queryCount, setQueryCount] = useState(0);
@@ -110,9 +56,10 @@ export default function Pricing() {
         content: `Cześć ${userName}! Powiedz mi, jakiego rodzaju prace budowlane planujesz? Na przykład: "Chcę odnowić łazienkę 5m² z wymianą płytek i armatury" lub "Potrzebuję pomalować mieszkanie 60m²". Im więcej szczegółów podasz, tym dokładniejsza będzie wycena.`
       }
     ]);
+
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmitUserQuery = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!chatInput.trim()) return;
@@ -133,7 +80,7 @@ export default function Pricing() {
     const userMessage = chatInput.trim();
     setChatInput("");
     
-    // Add user message to chat
+    // Add user message to chatuserMessage
     setChatMessages(prev => [...prev, { role: "user", content: userMessage }]);
     
     setIsLoading(true);
@@ -150,7 +97,8 @@ export default function Pricing() {
       const response = await apiRequest("POST", "/api/estimate", { 
         query: userMessage,
         userName: userName,
-        chatHistory: relevantChatHistory
+        chatHistory: relevantChatHistory,
+        id:userId
       });
       const data = await response.json();
       
@@ -203,13 +151,18 @@ export default function Pricing() {
             animate={inView ? "visible" : "hidden"}
           >
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="p-6 bg-primary-600 text-white">
+              <div className="p-6 pb-4 bg-primary-600 text-black">
                 <h3 className="text-xl font-bold">Lista Cen Usług</h3>
-                <p className="text-white/80">Ceny wyjściowe - ostateczne wyceny zależą od specyfiki projektu</p>
+                <p className="text-black/80">Ceny wyjściowe - ostateczne wyceny zależą od specyfiki projektu</p>
               </div>
-              <div className="p-6 overflow-auto">
+              <div className="p-6 pt-2">
                 <Tabs defaultValue="podstawowe" className="w-full">
-                  <TabsList className="grid grid-cols-5 w-full mb-8">
+                  <TabsList className="w-full flex justify-around overflow-x-auto overflow-y-hidden touch-auto
+  [scrollbar-width:thin]
+  [-ms-overflow-style:auto]
+  [&::-webkit-scrollbar]:h-1
+  [&::-webkit-scrollbar-track]:bg-transparent
+  [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full ">
                     <TabsTrigger value="podstawowe">Podstawowe</TabsTrigger>
                     <TabsTrigger value="kuchnie-lazienki">Kuchnie i Łazienki</TabsTrigger>
                     <TabsTrigger value="wykonczeniowe">Wykończeniowe</TabsTrigger>
@@ -220,7 +173,7 @@ export default function Pricing() {
                   {["podstawowe", "kuchnie-lazienki", "wykonczeniowe", "instalacje", "zewnetrzne"].map((category) => (
                     <TabsContent key={category} value={category} className="max-h-[400px] overflow-y-auto">
                       <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50 sticky top-0">
+                        <thead className="bg-gray-50 sticky">
                           <tr>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usługa</th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cena Początkowa</th>
@@ -296,7 +249,6 @@ export default function Pricing() {
                 {!userNameSubmitted ? (
                   <div className="space-y-3">
                     <Alert variant="default" className="bg-blue-50 mb-2">
-                      <Info className="h-4 w-4 text-blue-500" />
                       <AlertDescription className="text-sm text-blue-700">
                         Aby skorzystać z kalkulatora wyceny, podaj swoje imię.
                       </AlertDescription>
@@ -306,7 +258,7 @@ export default function Pricing() {
                       <input
                         type="text"
                         value={userName}
-                        onChange={(e) => setUserName(e.target.value)}
+                        onChange={(e) =>  setUserName(e.target.value)}
                         className="flex-1 border border-gray-300 rounded-l-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
                         placeholder="Twoje imię..."
                         disabled={isLoading}
@@ -336,7 +288,7 @@ export default function Pricing() {
                       </div>
                     </div>
                     
-                    <form onSubmit={handleSubmit} className="flex">
+                    <form onSubmit={handleSubmitUserQuery} className="flex">
                       <input
                         type="text"
                         value={chatInput}

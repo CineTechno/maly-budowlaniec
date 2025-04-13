@@ -1,20 +1,12 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { text, integer, sqliteTable } from 'drizzle-orm/sqlite-core';
+import {sql} from "drizzle-orm";
 
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-});
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
-
-export const contactRequests = pgTable("contact_requests", {
-  id: serial("id").primaryKey(),
+export const contactRequests = sqliteTable("contact_requests", {
+  id: integer("id", ).primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   email: text("email").notNull(),
   phone: text("phone"),
@@ -32,49 +24,33 @@ export const insertContactRequestSchema = createInsertSchema(contactRequests).pi
 });
 
 // Chat sessions table to store complete conversations
-export const chatSessions = pgTable("chat_sessions", {
-  id: serial("id").primaryKey(),
-  user_name: text("user_name").notNull(),
-  started_at: timestamp("started_at").defaultNow(),
-  chat_history: text("chat_history").notNull(), // JSON stringified chat history
-  total_messages: integer("total_messages").default(0),
+
+export const chats = sqliteTable("users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name"),
+  chat_history: text("chat_history")
 });
 
-export const insertChatSessionSchema = createInsertSchema(chatSessions).pick({
-  user_name: true,
-  chat_history: true,
-  total_messages: true,
-});
+export const insertChatSchema = createInsertSchema(chats).pick({
+  name:true,
+  chat_history: true
+})
 
-export const estimateRequests = pgTable("estimate_requests", {
-  id: serial("id").primaryKey(),
-  query: text("query").notNull(),
-  response: text("response").notNull(),
-  user_name: text("user_name"),
-  created_at: text("created_at").notNull(),
-  ip_address: text("ip_address"),
-  chat_session_id: integer("chat_session_id").references(() => chatSessions.id),
-});
 
-export const insertEstimateRequestSchema = createInsertSchema(estimateRequests).pick({
-  query: true,
-  response: true,
-  user_name: true,
-  ip_address: true,
-  chat_session_id: true,
-});
-
-export type User = typeof users.$inferSelect;
-export type InsertUser = z.infer<typeof insertUserSchema>;
+export type chats = typeof chats.$inferSelect;
+export type InsertUser = z.infer<typeof insertChatSchema>;
 
 export type ContactRequest = typeof contactRequests.$inferSelect;
 export type InsertContactRequest = z.infer<typeof insertContactRequestSchema>;
 
-export const calendarAvailability = pgTable("calendar_availability", {
-  id: serial("id").primaryKey(),
+
+
+
+export const calendarAvailability = sqliteTable("calendar_availability", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   date: text("date").notNull(),
   status: text("status").notNull().default("niedostepny"), // "dostepny", "zajety", or "niedostepny"
-  created_at: timestamp("created_at").defaultNow(),
+  created_at: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updated_by: integer("updated_by").references(() => users.id),
 });
 
@@ -84,11 +60,4 @@ export const insertCalendarAvailabilitySchema = createInsertSchema(calendarAvail
   updated_by: true,
 });
 
-export type EstimateRequest = typeof estimateRequests.$inferSelect;
-export type InsertEstimateRequest = z.infer<typeof insertEstimateRequestSchema>;
 
-export type CalendarAvailability = typeof calendarAvailability.$inferSelect;
-export type InsertCalendarAvailability = z.infer<typeof insertCalendarAvailabilitySchema>;
-
-export type ChatSession = typeof chatSessions.$inferSelect;
-export type InsertChatSession = z.infer<typeof insertChatSessionSchema>;

@@ -32,7 +32,7 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 // Auth provider component
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
-  
+
   // Get current user
   const {
     data: user,

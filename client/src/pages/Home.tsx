@@ -11,37 +11,7 @@ import Footer from "@/components/home/Footer";
 import ChatWidget from "@/components/chat/ChatWidget";
 
 export default function Home() {
-  useEffect(() => {
-    // Add smooth scrolling behavior
-    const handleAnchorClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const targetId = target.getAttribute('href');
-      
-      if (targetId && targetId.startsWith('#')) {
-        e.preventDefault();
-        
-        const targetElement = document.querySelector(targetId);
-        if (targetElement) {
-          window.scrollTo({
-            top: targetElement.getBoundingClientRect().top + window.scrollY - 80,
-            behavior: 'smooth'
-          });
-        }
-      }
-    };
 
-    // Add event listeners to all anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', handleAnchorClick as EventListener);
-    });
-
-    // Cleanup
-    return () => {
-      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.removeEventListener('click', handleAnchorClick as EventListener);
-      });
-    };
-  }, []);
 
   return (
     <div className="font-sans bg-gray-50 text-gray-800">
@@ -50,11 +20,11 @@ export default function Home() {
       <Services />
       <WhyChooseUs />
       <Pricing />
-      <Gallery />
-      <Calendar />
-      <Contact />
-      <Footer />
-      <ChatWidget />
+      {/*<Gallery />*/}
+      {/*<Calendar />*/}
+      {/*<Contact />*/}
+      {/*<Footer />*/}
+      {/*<ChatWidget />*/}
     </div>
   );
 }

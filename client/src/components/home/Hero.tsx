@@ -32,11 +32,11 @@ export default function Hero() {
   return (
     <section 
       id="hero" 
-      className="relative pt-24 bg-blue-800"
+      className="relative pt-8 bg-blue-800"
       ref={ref}
     >
       <div className="absolute inset-0 bg-gradient-to-r from-blue-800/95 to-blue-900/95"></div>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-20 md:py-32">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-10 md:py-32">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -76,7 +76,7 @@ export default function Hero() {
                 className="bg-orange-500 text-white hover:bg-orange-600"
                 asChild
               >
-                <a href="#services">Nasze Usługi</a>
+                <a href="#services">Wycena AI</a>
               </Button>
               <Button 
                 size="lg"
@@ -133,7 +133,7 @@ export default function Hero() {
             <img 
               src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80" 
               alt="Profesjonalny fachowiec przy pracy"
-              className="rounded-lg shadow-2xl object-cover h-[500px] w-full" 
+              className="rounded-lg shadow-2xl object-cover h-[700px] w-full"
             />
           </motion.div>
         </motion.div>

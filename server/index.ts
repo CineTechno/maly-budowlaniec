@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import {createServer} from "http";
 // import { User } from "@shared/schema";
 
 
@@ -20,7 +21,15 @@ app.use(express.urlencoded({ extended: false }));
 
 
 (async () => {
-  const server = await registerRoutes(app);
+  const server = createServer(app);
+
+  if (app.get("env") === "development") {
+
+    await setupVite(app, server);
+  } else {
+    serveStatic(app);
+  }
+  await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -30,18 +39,9 @@ app.use(express.urlencoded({ extended: false }));
     throw err;
   });
 
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
-  }
 
   const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
+  server.listen(port, '127.0.0.1', () => {
     log(`serving on port ${port}`);
   });
 })()

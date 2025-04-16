@@ -6,6 +6,7 @@ import { promisify } from "util";
 import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+// @ts-ignore
 import OpenAI, {ChatCompletionMessageParam} from "openai";
 import 'dotenv/config'
 
@@ -41,18 +42,18 @@ console.log("OpenAI API Key available:", !!process.env.OPENAI_API_KEY);
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
-  app.use(session({
-    secret: process.env.SESSION_SECRET || 'maly-budowlaniec-secret-key',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    }
-  }));
+  // app.use(session({
+  //   secret: process.env.SESSION_SECRET || 'maly-budowlaniec-secret-key',
+  //   resave: false,
+  //   saveUninitialized: false,
+  //   cookie: {
+  //     secure: process.env.NODE_ENV === 'production',
+  //     maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  //   }
+  // }));
   
-  app.use(passport.initialize());
-  app.use(passport.session());
+  // app.use(passport.initialize());
+  // app.use(passport.session());
   
   // passport.use(new LocalStrategy(async (username, password, done) => {
   //   try {
@@ -66,9 +67,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   //   }
   // }));
   
-  passport.serializeUser((user: any, done) => {
-    done(null, user.id);
-  });
+  // passport.serializeUser((user: any, done) => {
+  //   done(null, user.id);
+  // });
   
   // passport.deserializeUser(async (id: number, done) => {
   //   try {
@@ -80,24 +81,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // });
   
   // Authentication routes
-  app.post('/api/login', passport.authenticate('local'), (req, res) => {
-    res.json({ success: true, user: req.user });
-  });
-  
-  app.post('/api/logout', (req, res, next) => {
-    req.logout((err) => {
-      if (err) { return next(err); }
-      res.json({ success: true });
-    });
-  });
-  
-  app.get('/api/user', (req, res) => {
-    if (req.isAuthenticated()) {
-      res.json({ isAuthenticated: true, user: req.user });
-    } else {
-      res.json({ isAuthenticated: false });
-    }
-  });
+  // app.post('/api/login', passport.authenticate('local'), (req, res) => {
+  //   res.json({ success: true, user: req.user });
+  // });
+  //
+  // app.post('/api/logout', (req, res, next) => {
+  //   req.logout((err) => {
+  //     if (err) { return next(err); }
+  //     res.json({ success: true });
+  //   });
+  // });
+  //
+  // app.get('/api/user', (req, res) => {
+  //   if (req.isAuthenticated()) {
+  //     res.json({ isAuthenticated: true, user: req.user });
+  //   } else {
+  //     res.json({ isAuthenticated: false });
+  //   }
+  // });
   
   // Admin routes
   // app.get('/api/admin/contacts', isAuthenticated, async (req, res) => {
@@ -176,9 +177,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // });
   
   // Route to create initial admin user if none exists
-  app.post('/api/admin/setup', async (req, res) => {
-    try {
-      const {username, password} = req.body;
+  // app.post('/api/admin/setup', async (req, res) => {
+  //   try {
+  //     const {username, password} = req.body;
 
       // // Check if users exist already
       // const usersExist = await storage.checkIfUsersExist();
@@ -219,23 +220,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       //   }
       // });
 
-      app.put("/api/test", async (req, res) => {
+      app.get("/api/test", async (req, res) => {
         try {
           console.log("test");
           res.status(200).json({message: "API test successful"});
         } catch (e) {
-          res.status(500).json({error: e.message});
+          res.status(500).json({error:e});
         }
       });
 
       // Chat session routes
 
-      app.put("/api/new-user", async (req, res, next) => {
-        try {
-
-        } catch (e) {
-        }
-      })
+      // app.put("/api/new-user", async (req, res, next) => {
+      //   try {
+      //
+      //   } catch (e) {
+      //   }
+      // })
 
 
       // app.get("/api/chat-session/:userName", async (req, res) => {
@@ -254,22 +255,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       //   }
       // });
 
-      app.put("/api/chat-session/:id", async (req, res) => {
-        try {
-          const id = parseInt(req.params.id);
-          const {chatHistory, totalMessages} = req.body;
-
-          if (!chatHistory || typeof chatHistory !== "string" || !totalMessages || typeof totalMessages !== "number") {
-            return res.status(400).json({message: "Invalid chat session data"});
-          }
-
-          const chatSession = await storage.updateChatHistory(id, chatHistory, totalMessages);
-          res.json(chatSession);
-        } catch (error) {
-          console.error("Error updating chat session:", error);
-          res.status(500).json({message: "Server error"});
-        }
-      });
+      // app.put("/api/chat-session/:id", async (req, res) => {
+      //   try {
+      //     const id = parseInt(req.params.id);
+      //     const {chatHistory, totalMessages} = req.body;
+      //
+      //     if (!chatHistory || typeof chatHistory !== "string" || !totalMessages || typeof totalMessages !== "number") {
+      //       return res.status(400).json({message: "Invalid chat session data"});
+      //     }
+      //
+      //     const chatSession = await storage.updateChatHistory(id, chatHistory, totalMessages);
+      //     res.json(chatSession);
+      //   } catch (error) {
+      //     console.error("Error updating chat session:", error);
+      //     res.status(500).json({message: "Server error"});
+      //   }
+      // });
 
       // AI price estimator endpoint
       app.post("/api/estimate", async (req, res) => {
@@ -314,9 +315,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
               const fullUpdatedHistory = [...chatHistory, {role: "assistant", content: response}];
 
-              await storage.updateChatHistory(
-                  userId, fullUpdatedHistory
-              );
+              // await storage.updateChatHistory(
+              //     userId, fullUpdatedHistory
+              // );
 
               res.status(200).json({response, userId: userId});
             } catch (error) {

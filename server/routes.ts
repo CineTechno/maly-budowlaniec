@@ -1,7 +1,6 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContactRequestSchema, insertCalendarAvailabilitySchema } from "@shared/schema";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import session from "express-session";
@@ -17,28 +16,28 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 console.log("OpenAI API Key available:", !!process.env.OPENAI_API_KEY);
 
 // Helper functions for password hashing
-const scryptAsync = promisify(scrypt);
-
-async function hashPassword(password: string) {
-  const salt = randomBytes(16).toString("hex");
-  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${buf.toString("hex")}.${salt}`;
-}
-
-async function comparePasswords(supplied: string, stored: string) {
-  const [hashed, salt] = stored.split(".");
-  const hashedBuf = Buffer.from(hashed, "hex");
-  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-  return timingSafeEqual(hashedBuf, suppliedBuf);
-}
-
-// Middleware to check if user is authenticated
-function isAuthenticated(req: Request, res: Response, next: NextFunction) {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  res.status(401).json({ message: "Unauthorized" });
-}
+// const scryptAsync = promisify(scrypt);
+//
+// async function hashPassword(password: string) {
+//   const salt = randomBytes(16).toString("hex");
+//   const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+//   return `${buf.toString("hex")}.${salt}`;
+// }
+//
+// async function comparePasswords(supplied: string, stored: string) {
+//   const [hashed, salt] = stored.split(".");
+//   const hashedBuf = Buffer.from(hashed, "hex");
+//   const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+//   return timingSafeEqual(hashedBuf, suppliedBuf);
+// }
+//
+// // Middleware to check if user is authenticated
+// function isAuthenticated(req: Request, res: Response, next: NextFunction) {
+//   if (req.isAuthenticated()) {
+//     return next();
+//   }
+//   res.status(401).json({ message: "Unauthorized" });
+// }
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication

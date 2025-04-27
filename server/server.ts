@@ -3,9 +3,16 @@ import { createServer as createViteServer } from "vite";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 import { registerRoutes } from "./routes/routes";
+import dotenv from "dotenv";
+import OpenAI from "openai";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+dotenv.config({ path: "./server/.env" });
+export const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 async function startServer() {
   const app = express();

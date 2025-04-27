@@ -5,7 +5,7 @@ import { Send, AlertCircle, Info } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { pricingItems } from "@/lib/pricingItems.tsx";
+import { pricingItems } from "../../../../server/pricingItems";
 import React from "react";
 
 interface ChatMessage {
@@ -43,6 +43,8 @@ export default function Pricing() {
     }
   }, [chatMessages]);
 
+  // NAME SUBMIT
+
   const handleNameSubmit = () => {
     if (!userName.trim()) {
       setErrorMessage("Proszę podać swoje imię, aby kontynuować.");
@@ -60,6 +62,8 @@ export default function Pricing() {
       },
     ]);
   };
+
+  // QUERY SUBMIT
 
   const handleSubmitUserQuery = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,47 +90,33 @@ export default function Pricing() {
     const userMessage = chatInput.trim();
     setChatInput("");
 
-    // Add user message to chatuserMessage
-    setChatMessages((prev) => [
-      ...prev,
+    const updatedChatMessages: ChatMessage[] = [
+      ...chatMessages,
       { role: "user", content: userMessage },
-    ]);
+    ];
+
+    // Add user message to chatuserMessage
+    setChatMessages(updatedChatMessages);
 
     setIsLoading(true);
     setQueryCount((prev) => prev + 1);
+    // POSTING TO ESTIMATE
 
     try {
-      // Filter out initial bot message and get all the relevant conversation history
-      // const relevantChatHistory = chatMessages.filter(
-      //   (message) =>
-      //     // Skip the very first bot greeting
-      //     !(
-      //       message.role === "assistant" &&
-      //       message.content.includes("Witaj! Jestem Twoim asystentem AI")
-      //     )
-      // );
+      const response = await fetch("/api/estimate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ updatedChatMessages }),
+      });
 
-      // Send request to our API endpoint with full chat history
-
-      const response = await fetch("api/estimate");
       const data = await response.json();
-      // const response = await apiRequest(
-      //   "POST",
-      //   "http://localhost:5000/api/estimate",
-      //   {
-      //     query: userMessage,
-      //     userName: userName,
-      //     chatHistory: relevantChatHistory,
-      //     id: userId,
-      //   }
-      // );
-      // const data = await response.json();
 
-      // Add AI response to chat
-      // setChatMessages((prev) => [
-      //   ...prev,
-      //   { role: "assistant", content: data.response },
-      // ]);
+      setChatMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: data.content },
+      ]);
     } catch (error) {
       console.error("Error getting estimate:", error);
       setChatMessages((prev) => [
@@ -291,7 +281,7 @@ export default function Pricing() {
                     key={index}
                     className={`${
                       message.role === "assistant"
-                        ? "chat-bubble text-white bg-orange-500 p-3 rounded-lg rounded-bl-none max-w-[80%] shadow-sm"
+                        ? "chat-bubble !max-h-full text-white bg-orange-500 p-3 rounded-lg rounded-bl-none max-w-[80%] shadow-sm"
                         : "chat-bubble ml-auto bg-gray-100 text-gray-800 p-3 rounded-lg rounded-br-none max-w-[80%] shadow-sm"
                     }`}
                   >

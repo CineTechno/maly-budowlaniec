@@ -1,5 +1,4 @@
 import express from "express";
-import { createServer as createViteServer } from "vite";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 import { registerRoutes } from "./routes/routes";
@@ -17,7 +16,7 @@ export const openai = new OpenAI({
 async function startServer() {
   const app = express();
   app.use(express.json());
-  registerRoutes(app);
+  await registerRoutes(app);
 
   if (process.env.NODE_ENV === "production") {
     // Serve static files from dist

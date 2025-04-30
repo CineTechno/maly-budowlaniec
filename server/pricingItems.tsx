@@ -1,4 +1,4 @@
-interface PricingItem {
+export interface PricingItem {
   id: number;
   service: string;
   price: string;

@@ -281,7 +281,7 @@ export default function Pricing() {
                     key={index}
                     className={`${
                       message.role === "assistant"
-                        ? "chat-bubble !max-h-full text-white bg-orange-500 p-3 rounded-lg rounded-bl-none max-w-[80%] shadow-sm"
+                        ? "chat-bubble text-white bg-orange-500 p-3 rounded-lg rounded-bl-none max-w-[80%] shadow-sm"
                         : "chat-bubble ml-auto bg-gray-100 text-gray-800 p-3 rounded-lg rounded-br-none max-w-[80%] shadow-sm"
                     }`}
                   >
@@ -326,7 +326,7 @@ export default function Pricing() {
                       />
                       <button
                         type="button"
-                        onClick={handleNameSubmit}
+                        onSubmit={handleNameSubmit}
                         className="!bg-orange-500 text-white px-4 py-2 rounded-r-md hover:bg-orange-600 transition duration-150 disabled:opacity-50"
                         disabled={isLoading}
                       >

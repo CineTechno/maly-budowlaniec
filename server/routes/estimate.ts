@@ -1,57 +1,26 @@
-import { openai } from "server/server";
-import { Router, Request, Response } from "express";
-import { pricingItems } from "server/pricingItems";
-import { Tool } from "openai/resources/responses/responses.mjs";
-import { OutputItemListParams } from "openai/resources/evals/runs/output-items.mjs";
-import { JapaneseYenIcon } from "lucide-react";
+import {openai} from "server/server";
+import {Request, Response, Router} from "express";
+import {PricingItem, pricingItems} from "server/pricingItems";
+import {tools} from "../utils/tool_OpenAI.ts";
+import {ResponseFunctionToolCall} from "openai/resources/responses/responses";
 
 const estimate = Router();
 
-const serviceNames = pricingItems.map((service) => service.service);
 
-const tools: Tool[] = [
-  {
-    type: "function",
-    name: "estimate_cost",
-    description:
-      "Suggest specific services that solve the user's problem. For each service, include name, price, and unit. Choose only services from the provided list.",
-    strict: true,
-    parameters: {
-      type: "object",
-      properties: {
-        services: {
-          type: "array",
-          items: {
-            type: "object",
-            properties: {
-              service: {
-                type: "string",
-                enum: serviceNames, // serviceNames array
-                description: "The name of the service",
-              },
-              price: {
-                type: "string", // price as a string (e.g., '500 zł')
-                description: "The price of the service",
-              },
-              unit: {
-                type: "string",
-                description:
-                  "The measurement unit for the service (e.g., m², item, etc.)",
-              },
-            },
-            required: ["service", "price", "unit"],
-            additionalProperties: false,
-          },
-          description: "List of selected services with prices and units.",
-        },
-      },
-      required: ["services"],
-      additionalProperties: false,
-    },
-  },
-];
+export interface Service {
+  service: string,
+  price: string,
+  unit: string
+}
+
+export interface Arguments {
+  services: Service[];
+}
 
 estimate.post("/", async (req: Request, res: Response): Promise<void> => {
+
+  //API CALL
+
   try {
     const response = await openai.responses.create({
       model: "gpt-4.1", // or "gpt-4-turbo" or "gpt-3.5-turbo", etc.
@@ -73,14 +42,17 @@ estimate.post("/", async (req: Request, res: Response): Promise<void> => {
       tool_choice: "auto",
     });
 
-    if (!response.output[0]) {
+    const toolResponse = response.output[0] as ResponseFunctionToolCall
+    if (!toolResponse) {
       res.status(400).json({ error: "nie znaleziono usług" });
     }
-    console.dir(parseArguments(response), { depth: null });
-    if (response.output[0].type === "function_call") {
-      const services = parseArguments(response);
-      console.dir("WYNIK FLATMAP:" + services, { depth: null });
-      const total = calculatePrice(services);
+    console.dir(toolResponse, { depth: null });
+
+    //FUNCTION CALL
+
+    if (toolResponse.type === "function_call") {
+      const services: Service[] = parseArguments(toolResponse);
+      const total: number = calculatePrice(services);
 
       const assistantMessage = `Na podstawie Twojego opisu proponuję: ${services
         .map((s) => `${s.service} (${s.price}/${s.unit})`)
@@ -101,29 +73,24 @@ estimate.post("/", async (req: Request, res: Response): Promise<void> => {
       });
     }
   } catch (error) {
-    res.status(400).json({ error: "error" });
+    console.log(error)
+    res.status(500).json({ error: "error", details: error.message });
   }
 });
 
-function calculatePrice(serviceName: any) {
-  const matchedServices = pricingItems.filter((item) =>
-    serviceName.includes(item.service)
-  );
+function calculatePrice(service:Service[]) {
 
-  const total = matchedServices.reduce((sum, service) => {
+  const total = service.reduce((sum, service) => {
     const price: number = parseInt(service.price.replace(/\D/g, ""), 10);
     return (sum += price);
   }, 0);
 
-  return { matchedServices, total };
+  return total;
 }
 
-function parseArguments(response) {
-  if (response.output[0].type === "function_call") {
-    const Jsonparsed = JSON.parse(response.output[0].arguments);
-    const parsedArguments = Jsonparsed.flatMap((item) => item.service);
-    return Jsonparsed;
-  }
+function parseArguments(toolResponse:ResponseFunctionToolCall):Service[] {
+    const jsonParsed = JSON.parse(toolResponse.arguments) as Arguments;
+    return jsonParsed.services;
 }
 
 export default estimate;

@@ -23,6 +23,9 @@ export default function Calendar() {
   const [selectedStatus, setSelectedStatus] = useState<DayStatus>(
     mockAvailability[format(date, "yyyy-MM-dd")]
   );
+  const [month, setMonth] = useState<Date>(
+
+  )
 
   const { ref, inView } = useInView({
     triggerOnce: true,
@@ -60,12 +63,13 @@ export default function Calendar() {
         >
           <CalendarHeader></CalendarHeader>
         </motion.div>
-        <MonthSelect/>
+        <MonthSelect date={date} setDate={setDate}/>
         <div className="flex flex-col md:flex-row gap-8">
           <div className="basis-2/3">
             <CalendarGrid
               mockAvailability={mockAvailability}
               setSelectedStatus={setSelectedStatus}
+              date={date}
             ></CalendarGrid>
           </div>
           <div className="basis-1/3 h-1/2">

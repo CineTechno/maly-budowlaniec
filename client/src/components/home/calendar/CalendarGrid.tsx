@@ -15,6 +15,7 @@ import {pl} from "date-fns/locale/pl";
 interface CalendarGridProps {
   mockAvailability: DayAvailability;
   setSelectedStatus: (status: DayStatus) => void;
+  date:Date
 }
 
 function getcalendarTiles(currentDate: Date) {
@@ -34,16 +35,16 @@ function getcalendarTiles(currentDate: Date) {
 
 export default function CalendarGrid({
   mockAvailability,
-  setSelectedStatus,
+  setSelectedStatus, date
 }: CalendarGridProps) {
 
   const isBigScreen =useMediaQuery({minWidth:1200})
   return (
-    <div className="bg-white shadow-2xl rounded-lg border-1 h-full">
-      <div className="grid grid-cols-7 text-center gap-2">
-        {getcalendarTiles(new Date).map((date,i) => (
+      <>
+      <div className="grid grid-cols-7 text-center gap-1">
+        {getcalendarTiles(date).map((date,i) => (
             i<7?(
-                <div className="bg-gray-100 p-4 rounded-lg font-bold">
+                <div className="bg-gray-100 p-4 rounded-sm font-bold text-sm ">
                   {isBigScreen?format(date, "EEEE", {locale:pl}):
                       format(date, "EE", {locale:pl})
                   }
@@ -51,8 +52,10 @@ export default function CalendarGrid({
             ):null
         ))}
       </div>
+    <div className="bg-white shadow-sm rounded-lg h-full">
+
       <div className="grid grid-cols-7 grid-rows-5 gap-1">
-        {getcalendarTiles(new Date()).map((date, i) => {
+        {getcalendarTiles(date).map((date, i) => {
           const isTopRow = i < 7;
           const isLastRow = i <= 35 && i >= 28; // 6 rows x 7 columns = 42
           const isRightCol = (i + 1) % 7 === 0;
@@ -63,7 +66,7 @@ export default function CalendarGrid({
                 setSelectedStatus(mockAvailability[format(date, "yyyy-MM-dd")])
               }
               className={[
-                "flex items-center justify-center aspect-square rounded-lg",
+                "flex items-center justify-center aspect-square rounded-sm hover:brightness-110 hover:cursor-pointer",
                 !isTopRow && "border-t",
                 !isRightCol && "border-r",
                 !isLastRow && "border-b",
@@ -73,7 +76,7 @@ export default function CalendarGrid({
                 mockAvailability[format(date, "yyyy-MM-dd")] === "zajety" &&
                   "bg-orange-300",
                 ,
-                mockAvailability[format(date, "yyyy-MM-dd")] === "zajety" &&
+                mockAvailability[format(date, "yyyy-MM-dd")] === "niedostepny" &&
                   "bg-red-400",
               ]
                 .filter(Boolean)
@@ -85,5 +88,6 @@ export default function CalendarGrid({
         })}
       </div>
     </div>
+      </>
   );
 }

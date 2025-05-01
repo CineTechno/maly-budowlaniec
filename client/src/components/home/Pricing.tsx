@@ -2,7 +2,6 @@ import { useEffect, useState, useRef } from "react";
 import { useInView } from "react-intersection-observer";
 import { motion } from "framer-motion";
 import { Send, AlertCircle, Info } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { pricingItems } from "../../../../server/pricingItems";

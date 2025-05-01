@@ -1,16 +1,15 @@
-import {openai} from "server/server";
-import {Request, Response, Router} from "express";
-import {PricingItem, pricingItems} from "server/pricingItems";
-import {tools} from "../utils/tool_OpenAI.ts";
-import {ResponseFunctionToolCall} from "openai/resources/responses/responses";
+import { openai } from "server/server";
+import { Request, Response, Router } from "express";
+import { pricingItems } from "server/pricingItems";
+import { tools } from "../utils/tool_OpenAI.ts";
+import { ResponseFunctionToolCall } from "openai/resources/responses/responses";
 
 const estimate = Router();
 
-
 export interface Service {
-  service: string,
-  price: string,
-  unit: string
+  service: string;
+  price: string;
+  unit: string;
 }
 
 export interface Arguments {
@@ -18,7 +17,6 @@ export interface Arguments {
 }
 
 estimate.post("/", async (req: Request, res: Response): Promise<void> => {
-
   //API CALL
 
   try {
@@ -42,7 +40,7 @@ estimate.post("/", async (req: Request, res: Response): Promise<void> => {
       tool_choice: "auto",
     });
 
-    const toolResponse = response.output[0] as ResponseFunctionToolCall
+    const toolResponse = response.output[0] as ResponseFunctionToolCall;
     if (!toolResponse) {
       res.status(400).json({ error: "nie znaleziono usług" });
     }
@@ -73,13 +71,12 @@ estimate.post("/", async (req: Request, res: Response): Promise<void> => {
       });
     }
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({ error: "error", details: error.message });
   }
 });
 
-function calculatePrice(service:Service[]) {
-
+function calculatePrice(service: Service[]) {
   const total = service.reduce((sum, service) => {
     const price: number = parseInt(service.price.replace(/\D/g, ""), 10);
     return (sum += price);
@@ -88,9 +85,9 @@ function calculatePrice(service:Service[]) {
   return total;
 }
 
-function parseArguments(toolResponse:ResponseFunctionToolCall):Service[] {
-    const jsonParsed = JSON.parse(toolResponse.arguments) as Arguments;
-    return jsonParsed.services;
+function parseArguments(toolResponse: ResponseFunctionToolCall): Service[] {
+  const jsonParsed = JSON.parse(toolResponse.arguments) as Arguments;
+  return jsonParsed.services;
 }
 
 export default estimate;

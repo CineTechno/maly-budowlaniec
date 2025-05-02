@@ -1,5 +1,7 @@
 import { addDays, format } from "date-fns";
-import { DayAvailability } from "./Calendar";
+import {DayAvailability} from "@/components/home/calendar/Calendar.tsx";
+// import {Calendar} from "../models/CalendarModel.ts";
+import {connectToDatabase} from "./mongodb.ts";
 
 const generateCalendarAvailability = (): DayAvailability => {
   const availability: DayAvailability = {};
@@ -8,7 +10,6 @@ const generateCalendarAvailability = (): DayAvailability => {
   for (let i = 0; i < 70; i++) {
     const date = addDays(today, i);
     const dateStr = format(date, "yyyy-MM-dd");
-    const dayOfWeek = date.getDay();
     const random = Math.random();
     // Assign statuses based on day of week and randomness
 
@@ -25,4 +26,20 @@ const generateCalendarAvailability = (): DayAvailability => {
 };
 
 const mockAvailability: DayAvailability = generateCalendarAvailability();
-export default mockAvailability;
+// console.log(mockAvailability);
+//
+// async function loadAvailabilityToDb() {
+//   try {
+//
+//   await connectToDatabase()
+//   await Calendar.create({dates:mockAvailability})
+//   }catch(err) {
+//     console.log(err);
+//   }
+// }
+
+// loadAvailabilityToDb()
+//     .then(() => console.log("✅ Calendar loaded"))
+//     .catch(console.error);
+
+export default mockAvailability

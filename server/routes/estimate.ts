@@ -3,6 +3,8 @@ import { Request, Response, Router } from "express";
 import { pricingItems } from "server/pricingItems";
 import { tools } from "../utils/tool_OpenAI.ts";
 import { ResponseFunctionToolCall } from "openai/resources/responses/responses";
+import {connectToDatabase} from "../lib/mongodb.ts";
+import {Estimate} from "../models/Estimate.ts";
 
 const estimate = Router();
 
@@ -16,7 +18,14 @@ export interface Arguments {
   services: Service[];
 }
 
-estimate.post("/", async (req: Request, res: Response): Promise<void> => {
+interface EstimateRequestBody {
+  userId: string;
+  updatedChatMessages: {role:"user" | "assistant", content: string}[];
+}
+
+export interface EstimateDocument extends EstimateRequestBody, Document {}
+
+estimate.post("/", async (req:Request<{},{},EstimateRequestBody>, res: Response): Promise<void> => {
   //API CALL
 
   try {
@@ -44,7 +53,6 @@ estimate.post("/", async (req: Request, res: Response): Promise<void> => {
     if (!toolResponse) {
       res.status(400).json({ error: "nie znaleziono usług" });
     }
-    console.dir(toolResponse, { depth: null });
 
     //FUNCTION CALL
 
@@ -57,6 +65,30 @@ estimate.post("/", async (req: Request, res: Response): Promise<void> => {
         .join(
           ", "
         )}. Szacunkowy koszt wynosi: ${total} zł. Czy chcesz kontynuować?`;
+
+        const updatedChatMessages= [...req.body.updatedChatMessages, {role:"assistant", content:assistantMessage}];
+        const userId = req.body.userId;
+
+      //DB CONNECT
+
+    try {
+      await connectToDatabase();
+      let convo = await Estimate.findOne({ userId }).sort({ createdAt: -1 });
+      if (convo) {
+        convo.updatedChatMessages=updatedChatMessages; // Append new messages
+        await convo.save();
+        console.log("Estimate updated entry:", convo);
+      } else {
+         const newEntry = await Estimate.create({
+          userId: userId,
+          updatedChatMessages: updatedChatMessages,
+        })
+        console.error("Added new entry:" + JSON.stringify(newEntry));
+      }
+    }catch(err){
+      console.error("DB Error:", err);
+      res.status(500).json({ message: "Server error" });
+    }
 
       res.json({
         type: "estimate",

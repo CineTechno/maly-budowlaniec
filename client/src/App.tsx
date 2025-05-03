@@ -1,23 +1,18 @@
 import "./App.css";
 import React from "react";
-import Navbar from "./components/home/Navbar.tsx";
-import Hero from "./components/home/Hero.tsx";
-import Services from "./components/home/Services.tsx";
-import Pricing from "./components/home/Pricing.tsx";
-import WhyChooseUs from "@/components/home/WhyChooseUs.tsx";
-import Gallery from "./components/home/Gallery.tsx";
-import Calendar from "@/components/home/calendar/Calendar.tsx";
+import {Routes, Route} from "react-router-dom";
+import Home from "@/components/home/Home.tsx";
+import Admin from "@/components/AdminPanel/Admin.tsx";
+
+
+
 
 function App() {
   return (
-    <div>
-      <Navbar></Navbar>
-      <Hero></Hero>
-      <WhyChooseUs></WhyChooseUs>
-      <Pricing></Pricing>
-      <Gallery></Gallery>
-      <Calendar></Calendar>
-    </div>
+    <Routes>
+    <Route path="/" element={<Home/>} />
+      <Route path="/admin" element={<Admin/>} />
+    </Routes>
   );
 }
 

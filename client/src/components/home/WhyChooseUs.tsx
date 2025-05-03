@@ -8,6 +8,7 @@ import {
   BadgeCheck, 
   Gem
 } from "lucide-react";
+import React from "react";
 
 interface Reason {
   id: number;

@@ -5,6 +5,7 @@ import { Send, AlertCircle, Info } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { pricingItems } from "../../../../server/pricingItems";
+import {v4 as uuidv4} from "uuid"
 import React from "react";
 
 interface ChatMessage {
@@ -15,7 +16,7 @@ interface ChatMessage {
 export default function Pricing() {
   const [chatInput, setChatInput] = useState("");
   const [userName, setUserName] = useState("");
-  const [userId, setUserId] = useState(1243534523423523);
+  const [userId, setUserId] = useState("");
   const [userNameSubmitted, setUserNameSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [queryCount, setQueryCount] = useState(0);
@@ -42,9 +43,22 @@ export default function Pricing() {
     }
   }, [chatMessages]);
 
+  useEffect(()=>{
+    let existingUserId = localStorage.getItem("userId");
+    if(!existingUserId){
+      existingUserId = uuidv4();
+      localStorage.setItem("userId", existingUserId);
+    }
+
+    setUserId(existingUserId);
+  },[])
+
+
+
   // NAME SUBMIT
 
   const handleNameSubmit = () => {
+    console.log("hello")
     if (!userName.trim()) {
       setErrorMessage("Proszę podać swoje imię, aby kontynuować.");
       return;
@@ -107,7 +121,7 @@ export default function Pricing() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ updatedChatMessages }),
+        body: JSON.stringify({ userId, updatedChatMessages }),
       });
 
       const data = await response.json();
@@ -324,8 +338,8 @@ export default function Pricing() {
                         maxLength={30}
                       />
                       <button
-                        type="button"
-                        onSubmit={handleNameSubmit}
+                        type="submit"
+                        onClick={handleNameSubmit}
                         className="!bg-orange-500 text-white px-4 py-2 rounded-r-md hover:bg-orange-600 transition duration-150 disabled:opacity-50"
                         disabled={isLoading}
                       >

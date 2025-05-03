@@ -3,7 +3,7 @@ import { Link } from "wouter";
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-white py-12">
+    <footer className="bg-gray-900 text-white py-8">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8">
           <div>
@@ -26,22 +26,10 @@ export default function Footer() {
               </a>
             </div>
           </div>
-          
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Szybkie Linki</h3>
-            <ul className="space-y-2">
-              <li><a href="#services" className="text-gray-400 hover:text-white transition-colors">Usługi</a></li>
-              <li><a href="#pricing" className="text-gray-400 hover:text-white transition-colors">Cennik</a></li>
-              <li><a href="#gallery" className="text-gray-400 hover:text-white transition-colors">Galeria</a></li>
-              <li><a href="#contact" className="text-gray-400 hover:text-white transition-colors">Kontakt</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Polityka Prywatności</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Warunki Usługi</a></li>
-              <li><Link to="/admin/login" className="text-gray-400 hover:text-white transition-colors">Panel Admina</Link></li>
-            </ul>
-          </div>
+
         </div>
         
-        <div className="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
+        <div className="mt-2 pt-2 border-t border-gray-800 text-gray-400">
           <p>© {new Date().getFullYear()} Mały Budowlaniec. Wszelkie prawa zastrzeżone.</p>
         </div>
       </div>

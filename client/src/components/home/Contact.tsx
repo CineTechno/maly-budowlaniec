@@ -26,6 +26,7 @@ import {
   Twitter,
   Linkedin
 } from "lucide-react";
+import React from "react";
 
 const contactFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -108,7 +109,7 @@ export default function Contact() {
     <section id="contact" className="py-16 md:py-24 bg-gray-50" ref={ref}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div 
-          className="text-center mb-16"
+          className="text-center mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6 }}
@@ -229,7 +230,7 @@ export default function Contact() {
                 <Button 
                   type="submit" 
                   className="w-full bg-primary-500 hover:bg-primary-600"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting}1
                 >
                   {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>

@@ -6,19 +6,22 @@ import React from "react";
 import CalendarGrid from "./CalendarGrid.tsx";
 import CalendarHeader from "./CalendarHeader";
 import Availability from "./Availability";
-import mockAvailability from "./mockAvailability.ts";
+import mockAvailability from "../../../../../server/lib/mockAvailability.ts"
 import MonthSelect from "@/components/home/calendar/MonthSelect.tsx";
+import {CalendarContext} from "@/components/home/calendar/CalendarContext.tsx";
 
 // Define status types for days
-export type DayStatus = "dostepny" | "zajety" | "niedostepny";
+export type DayStatus = "Dostępny" | "Częściowo dostępny" | "Niedostępny";
 
 export interface DayAvailability {
-  [date: string]: DayStatus;
+  start: string,
+  end: string,
+  status: DayStatus,
 }
 
 // Generate mockAvailability for the next 14 days
 
-export default function Calendar() {
+export default function Calendar({classname, isAdmin}:{classname: string, isAdmin: boolean}) {
   const [date, setDate] = useState<Date>(new Date());
   const [selectedStatus, setSelectedStatus] = useState<DayStatus>(
     mockAvailability[format(date, "yyyy-MM-dd")]
@@ -37,24 +40,11 @@ export default function Calendar() {
     const dateStr = format(newDate, "yyyy-MM-dd");
     setSelectedStatus(mockAvailability[dateStr]);
   };
-  // Helper functions for day status
-  const isDayDostepny = (day: Date): boolean => {
-    const dateStr = format(day, "yyyy-MM-dd");
-    return mockAvailability[dateStr] === "dostepny";
-  };
 
-  const isDayZajety = (day: Date): boolean => {
-    const dateStr = format(day, "yyyy-MM-dd");
-    return mockAvailability[dateStr] === "zajety";
-  };
-
-  const isDayNiedostepny = (day: Date): boolean => {
-    const dateStr = format(day, "yyyy-MM-dd");
-    return mockAvailability[dateStr] === "niedostepny";
-  };
   return (
-    <section id="calendar" className="py-2 bg-white" ref={ref}>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <CalendarContext.Provider value={{isAdmin}}>
+    <section id="calendar" className={`${classname} bg - white" ref={ref}`}>
+      <div className={`${classname}container mx-auto px-4 sm:px-6 lg:px-8`}>
         <motion.div
           className="text-center mb-6"
           initial={{ opacity: 0, y: 20 }}
@@ -67,7 +57,6 @@ export default function Calendar() {
         <div className="flex flex-col md:flex-row gap-8">
           <div className="basis-2/3">
             <CalendarGrid
-              mockAvailability={mockAvailability}
               setSelectedStatus={setSelectedStatus}
               date={date}
             ></CalendarGrid>
@@ -81,5 +70,6 @@ export default function Calendar() {
         </div>
       </div>
     </section>
+      </CalendarContext.Provider>
   );
 }

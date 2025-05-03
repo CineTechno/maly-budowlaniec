@@ -11,7 +11,7 @@ import MonthSelect from "@/components/home/calendar/MonthSelect.tsx";
 import {CalendarContext} from "@/components/home/calendar/CalendarContext.tsx";
 
 // Define status types for days
-export type DayStatus = "Dostępny" | "Częściowo dostępny" | "Niedostępny";
+export type DayStatus = "Częściowo dostępny" | "Niedostępny" | "Dostępny"
 
 export interface DayAvailability {
   start: string,

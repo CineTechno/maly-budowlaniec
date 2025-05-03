@@ -1,10 +1,18 @@
 import mongoose from "mongoose";
 
 const calendarSchema = new mongoose.Schema({
-    dates: {
-        type: Map,
-        of: String,
-        required: true
+    start: {
+        type: Date,
+        required: true,
+    },
+    end: {
+        type: Date,
+        required: true,
+    },
+    status: {
+        type: String,
+        enum: ["Częściowo dostępny", "Niedostępny"],
+        required: true,
     },
 });
 

@@ -8,7 +8,11 @@ import {Calendar} from "../models/CalendarModel.ts";
 calendar.post("/", async (req, res) => {
     try{
         await connectToDatabase()
-        const newEntry = await Calendar.create(req.body)
+        const newEntry = await Calendar.findOneAndUpdate(
+            {},
+            {availabilities:req.body},
+            {upsert:true, new: true}
+            )
         console.log("Type of req.body:", typeof req.body);
         console.log("Is array?", Array.isArray(req.body));
         console.log("Body content:", req.body);
@@ -16,6 +20,21 @@ calendar.post("/", async (req, res) => {
         res.status(200).json({ message: "Success", data: newEntry });
     }catch(err){
         console.log(err)
+    }
+})
+
+calendar.get("/", async (req, res) => {
+    try{
+        await connectToDatabase()
+        const calendarData = await Calendar.findOne()
+        if(!calendarData){
+            return res.status(404).json({ message: "No calendar data found." });
+        }
+
+        res.status(200).json(calendarData);
+    }catch(err){
+        console.error("error getting calendar data:", err);
+        res.status(404).json({ message: "No calendar data found." });
     }
 })
 

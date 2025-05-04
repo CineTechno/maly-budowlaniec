@@ -26,27 +26,27 @@ export default function Availability({
               className={`
                 inline-block text-sm md:text-2xl font-bold p-2 md:p-6 rounded-lg mb-1 md:mb-4
                 ${
-                  selectedStatus === "dostepny"
-                    ? "bg-green-100 text-green-800 border-2 border-green-500"
-                    : selectedStatus === "zajety"
+                  selectedStatus === "Niedostępny"
+                    ? "bg-red-100 text-red-800 border-2 border-red-500"
+                    : selectedStatus === "Częściowo dostępny"
                     ? "bg-orange-100 text-orange-800 border-2 border-orange-500"
-                    : "bg-red-100 text-red-800 border-2 border-red-500"
+                    : " bg-green-100 text-green-800 border-2 border-green-500"
                 }
               `}
             >
-              {selectedStatus === "dostepny"
-                ? "Dostępny"
-                : selectedStatus === "zajety"
-                ? "Zajęty"
-                : "Niedostępny"}
+              {selectedStatus === "Niedostępny"
+                ? "Niedostępny"
+                : selectedStatus === "Częściowo dostępny"
+                ? "Częściowo dostępny"
+                : "Dostępny"}
             </div>
 
             <p className=" text-sm md:text-base mt-4 text-gray-700">
-              {selectedStatus === "dostepny"
-                ? "W tym dniu możemy wykonać wszystkie usługi. Zadzwoń, aby umówić spotkanie."
-                : selectedStatus === "zajety"
-                ? "W tym dniu mamy ograniczoną dostępność. Zadzwoń, aby sprawdzić możliwości."
-                : "W tym dniu nie jesteśmy dostępni. Wybierz inny dzień."}
+              {selectedStatus === "Częściowo dostępny"
+                ? "W tym dniu mamy ograniczoną dostępność."
+                : selectedStatus === "Niedostępny"
+                ? "Zadzwoń, aby sprawdzić możliwości.W tym dniu nie jesteśmy dostępni. Wybierz inny dzień."
+                : "W tym dniu możemy wykonać wszystkie usługi. Zadzwoń, aby umówić spotkanie."}
             </p>
           </div>
         ) : date ? (

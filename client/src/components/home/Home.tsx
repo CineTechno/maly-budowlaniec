@@ -7,10 +7,12 @@ import Calendar from "@/components/home/calendar/Calendar.tsx";
 import MyContact from "@/components/home/MyContact.tsx";
 import Footer from "@/components/home/Footer.tsx";
 import React from "react";
+import { CalendarContext } from "./calendar/CalendarContext";
 
 export default function Home() {
     return (
         <div>
+            <CalendarContext.Provider value={{ isAdmin: false }}>
             <Navbar></Navbar>
             <Hero></Hero>
             <WhyChooseUs></WhyChooseUs>
@@ -19,6 +21,7 @@ export default function Home() {
             <Calendar></Calendar>
             <MyContact></MyContact>
             <Footer></Footer>
+            </CalendarContext.Provider>
         </div>
     );
 }

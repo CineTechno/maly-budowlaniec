@@ -9,7 +9,7 @@ import {
   startOfWeek, subDays,
 } from "date-fns";
 import {useMediaQuery} from "react-responsive";
-import React, {useCallback, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import { DayAvailability, DayStatus } from "./Calendar";
 import {pl} from "date-fns/locale/pl";
 import {CalendarContext} from "@/components/home/calendar/CalendarContext.tsx";
@@ -19,6 +19,9 @@ import {boolean} from "zod";
 interface CalendarGridProps {
   setSelectedStatus: (status: DayStatus) => void;
   date:Date
+  setMockAvailability: (availability: DayAvailability[]) => void;
+  mockAvailability:( DayAvailability | null)[];
+
 }
 
 interface DayStartEnd {
@@ -57,16 +60,34 @@ function isDateInRange(dateToCheck: Date, range: DayStartEnd):boolean {
 }
 
 export default function CalendarGrid({
-  setSelectedStatus, date
+  setSelectedStatus, date, setMockAvailability, mockAvailability
 }: CalendarGridProps) {
+
+  const {isAdmin}= useContext(CalendarContext);
 
   const [dayStartEnd, setDayStartEnd] = useState<DayStartEnd>(
       {dayStart:null, dayEnd:null}
   );
   const [selectedOption, setSelectedOption] = useState<DayStatus>("Częściowo dostępny")
 
-  const [mockAvailability, setMockAvailability] = useState<(DayAvailability | null)[] >
-  ([])
+
+
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    const fetchAvailability = async () => {
+      try {
+        const response = await fetch("/api/calendar",);
+        const data = await response.json()
+        setMockAvailability(data.availabilities)
+      }catch(err){
+        console.error("Error fetching:", err)
+      }
+
+    }
+
+    void fetchAvailability();
+  },[refreshKey]);
 
   function handleDayStartEnd(newDate: Date) {
     const { dayStart, dayEnd } = dayStartEnd;
@@ -96,61 +117,59 @@ export default function CalendarGrid({
     e.preventDefault();
 
     const { dayStart, dayEnd } = dayStartEnd;
-
     if (!dayStart || !dayEnd) return;
-
-    const startTimestamp = dayStart.getTime();
-    const endTimestamp = dayEnd.getTime();
 
     const newStart = format(dayStart, "yyyy-MM-dd");
     const newEnd = format(dayEnd, "yyyy-MM-dd");
 
-    const updated = mockAvailability
-        .flatMap((avail): DayAvailability[] => {
-          const availStart = new Date(avail.start).getTime();
-          const availEnd = new Date(avail.end).getTime();
+    const updated = mockAvailability.flatMap((avail): DayAvailability[] => {
+      const availStart = avail.start;
+      const availEnd = avail.end;
 
-          const overlaps = startTimestamp <= availEnd && endTimestamp >= availStart;
-          if (!overlaps) return [avail];
+      const overlaps = newStart <= availEnd && newEnd >= availStart;
+      if (!overlaps) return [avail];
 
-          if (availStart >= startTimestamp && availEnd <= endTimestamp) return [];
+      // Case 1: Fully covered → remove
+      if (availStart >= newStart && availEnd <= newEnd) return [];
 
-          if (availStart < startTimestamp && availEnd <= endTimestamp && availEnd >= startTimestamp) {
-            return [{
-              start: avail.start,
-              end: format(subDays(dayStart, 1), "yyyy-MM-dd"),
-              status: avail.status
-            }];
+      // Case 2: Trim end
+      if (availStart < newStart && availEnd >= newStart && availEnd <= newEnd) {
+        return [{
+          start: availStart,
+          end: format(subDays(dayStart, 1), "yyyy-MM-dd"),
+          status: avail.status
+        }];
+      }
+
+      // Case 3: Trim start
+      if (availStart >= newStart && availStart <= newEnd && availEnd > newEnd) {
+        return [{
+          start: format(addDays(dayEnd, 1), "yyyy-MM-dd"),
+          end: availEnd,
+          status: avail.status
+        }];
+      }
+
+      // Case 4: Split into two ranges
+      if (availStart < newStart && availEnd > newEnd) {
+        return [
+          {
+            start: availStart,
+            end: format(subDays(dayStart, 1), "yyyy-MM-dd"),
+            status: avail.status
+          },
+          {
+            start: format(addDays(dayEnd, 1), "yyyy-MM-dd"),
+            end: availEnd,
+            status: avail.status
           }
+        ];
+      }
 
-          if (availStart >= startTimestamp && availStart <= endTimestamp && availEnd > endTimestamp) {
-            return [{
-              start: format(addDays(dayEnd, 1), "yyyy-MM-dd"),
-              end: avail.end,
-              status: avail.status
-            }];
-          }
+      return [avail];
+    });
 
-          if (availStart < startTimestamp && availEnd > endTimestamp) {
-            return [
-              {
-                start: avail.start,
-                end: format(subDays(dayStart, 1), "yyyy-MM-dd"),
-                status: avail.status
-              },
-              {
-                start: format(addDays(dayEnd, 1), "yyyy-MM-dd"),
-                end: avail.end,
-                status: avail.status
-              }
-            ];
-          }
-
-          return [avail];
-        });
-
-// Add the new entry
-    const finalAvailability = [
+    const finalAvailability: DayAvailability[] = [
       ...updated,
       {
         start: newStart,
@@ -159,20 +178,18 @@ export default function CalendarGrid({
       }
     ];
 
-// Update state
-    setMockAvailability(finalAvailability);
+    setRefreshKey(prev => prev + 1);
 
-// Now send the correct data
     try {
       await fetch("/api/calendar", {
         method: "POST",
-        body: JSON.stringify(finalAvailability), // ✅ use the latest version
+        body: JSON.stringify(finalAvailability),
         headers: {
           "Content-Type": "application/json"
         }
       });
     } catch (error) {
-      console.error(error);
+      console.error("Failed to save availability:", error);
     }
 
     setDayStartEnd({ dayStart: null, dayEnd: null });
@@ -182,7 +199,7 @@ export default function CalendarGrid({
   const checkDateStatus = useCallback((date: Date): DayStatus | null => {
     const formatted = format(date, "yyyy-MM-dd"); // convert the tile's Date to string
 
-    const matchingRange = mockAvailability.find((availability) => {
+    const matchingRange = mockAvailability?.find((availability) => {
       return (
           formatted >= availability.start &&
           formatted <= availability.end
@@ -196,7 +213,7 @@ export default function CalendarGrid({
 
   const isBigScreen =useMediaQuery({minWidth:1200})
 
-  const {isAdmin} = useContext(CalendarContext);
+
   return (
       <>
       <div className="grid grid-cols-7 text-center gap-1">
@@ -230,9 +247,10 @@ export default function CalendarGrid({
               }
               className={[
                 "flex items-center justify-center aspect-square rounded-sm hover:brightness-110 hover:cursor-pointer",
-                "border-gray-400",
-                status==="Częściowo dostępny"?"bg-orange-300":"bg-green-400",
-                  status==="Niedostępny"?"bg-red-400":"bg-green-400",
+                "border-gray-400 bg-green-400",
+                status==="Dostępny"?"bg-green-400":"",
+                status==="Częściowo dostępny"?"bg-orange-300":"",
+                  status==="Niedostępny"?"bg-red-400":"",
                  isDateInRange(date, dayStartEnd)?"!bg-blue-500":"",
               ]
                 .join(" ")
@@ -253,16 +271,10 @@ export default function CalendarGrid({
           }>
             <option value={"Częściowo dostępny"}>Częściowo dostępny</option>
             <option value={"Niedostępny"}>Niedostępny</option>
+            <option value={"Dostępny"}>Dostępny</option>
           </select>
           <button type="submit"></button>
           </form>
-          <div>
-            {mockAvailability.map((date, index) => (
-                <div key={index}>
-                  {date.start} - {date.end} - {date?.status}
-                </div>
-            ))}
-          </div>
         </div>
       </>
   );

@@ -25,6 +25,20 @@ interface EstimateRequestBody {
 
 export interface EstimateDocument extends EstimateRequestBody, Document {}
 
+estimate.get("/", async (req: Request, res: Response) => {
+  let chatHistory
+  try{
+    await connectToDatabase()
+    chatHistory = await Estimate.find({})
+  }catch(err){
+    res.status(500).send({"Can't connect to the database.":err})
+    return
+  }
+  res.json({response:chatHistory})
+  console.log("Sent chat history")
+  console.log(chatHistory)
+})
+
 estimate.post("/", async (req:Request<{},{},EstimateRequestBody>, res: Response): Promise<void> => {
   //API CALL
 

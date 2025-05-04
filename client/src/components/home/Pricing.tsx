@@ -8,7 +8,7 @@ import { pricingItems } from "../../../../server/pricingItems";
 import {v4 as uuidv4} from "uuid"
 import React from "react";
 
-interface ChatMessage {
+export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
 }

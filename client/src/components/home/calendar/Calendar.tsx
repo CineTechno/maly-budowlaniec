@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import {useContext, useRef, useState} from "react";
 import { useInView } from "react-intersection-observer";
 import { motion } from "framer-motion";
 import { format, addDays } from "date-fns";
@@ -21,28 +21,22 @@ export interface DayAvailability {
 
 // Generate mockAvailability for the next 14 days
 
-export default function Calendar({classname, isAdmin}:{classname: string, isAdmin: boolean}) {
+export default function Calendar({classname}:{classname: string}) {
   const [date, setDate] = useState<Date>(new Date());
-  const [selectedStatus, setSelectedStatus] = useState<DayStatus>(
-    mockAvailability[format(date, "yyyy-MM-dd")]
-  );
-  const [month, setMonth] = useState<Date>(
 
-  )
+  const [mockAvailability, setMockAvailability] = useState<(DayAvailability | null)[]>()
+  const [selectedStatus, setSelectedStatus] = useState<DayStatus>("Dostępny");
+
 
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0.1,
   });
 
-  const handleDateSelect = (newDate: Date) => {
-    setDate(newDate);
-    const dateStr = format(newDate, "yyyy-MM-dd");
-    setSelectedStatus(mockAvailability[dateStr]);
-  };
+  const {isAdmin} = useContext(CalendarContext);
 
   return (
-      <CalendarContext.Provider value={{isAdmin}}>
+
     <section id="calendar" className={`${classname} bg - white" ref={ref}`}>
       <div className={`${classname}container mx-auto px-4 sm:px-6 lg:px-8`}>
         <motion.div
@@ -57,19 +51,21 @@ export default function Calendar({classname, isAdmin}:{classname: string, isAdmi
         <div className="flex flex-col md:flex-row gap-8">
           <div className="basis-2/3">
             <CalendarGrid
+                setMockAvailability={setMockAvailability}
+                mockAvailability={mockAvailability}
               setSelectedStatus={setSelectedStatus}
               date={date}
             ></CalendarGrid>
           </div>
           <div className="basis-1/3 h-1/2">
-            <Availability
-              date={date}
-              selectedStatus={selectedStatus}
-            ></Availability>
+            {!isAdmin?(<Availability
+                date={date}
+                selectedStatus={selectedStatus}
+            ></Availability>):""}
           </div>
         </div>
       </div>
     </section>
-      </CalendarContext.Provider>
+
   );
 }

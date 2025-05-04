@@ -3,6 +3,8 @@ import Login from "@/components/AdminPanel/Login.tsx";
 import Calendar from "@/components/home/calendar/Calendar.tsx";
 import { CalendarContext } from "../home/calendar/CalendarContext";
 import ChatMessages from "@/components/AdminPanel/ChatMessages.tsx";
+import Pricing from "@/components/home/Pricing.tsx";
+
 
 
 export default function Admin(){
@@ -11,10 +13,11 @@ export default function Admin(){
 
     return(
         <CalendarContext.Provider value={{ isAdmin: true }}>
-        <div className="container mx-auto h-screen">
+        <div className="h-screen flex flex-col gap-6">
             <Login className={isLoggedIn ? "hidden" : ""}  setIsLoggedIn = {setIsLoggedIn}/>
             <Calendar classname={!isLoggedIn?"hidden":""}></Calendar>
-            <ChatMessages></ChatMessages>
+            <ChatMessages className={!isLoggedIn?"hidden":""}></ChatMessages>
+            <Pricing className={!isLoggedIn?"hidden":""}></Pricing>
 
         </div>
         </CalendarContext.Provider>

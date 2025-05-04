@@ -18,7 +18,7 @@ interface MessagesEntry {
     updatedChatMessages: ChatMessage[];
 }
 
-export default function ChatMessages() {
+export default function ChatMessages({className}: {className?: string}) {
 
     const [messages, setMessages] = useState<MessagesEntry[]>([]);
     const [userMessages, setUserMessages] = useState<ChatMessage[]>([]);
@@ -48,20 +48,20 @@ export default function ChatMessages() {
         setUserMessages(chatMessages);
     }
     return (
-        <div className="container mx-auto ">
-            <div className="mx-4 rounded-lg shadow-sm flex gap-4">
-            <div className="flex flex-col gap-4">
+        <div className={`${className} container mx-auto`} >
+            <div className="mx-4 rounded-lg shadow-sm grid grid-cols-[auto_1fr] gap-6 items-start">
+            <div className="flex flex-col gap-4 max-h-100 overflow-y-auto">
                 {messages.map((message,index) => (
-                    <div key={index} onClick={() => handleUserSelect(message.updatedChatMessages)}>
+                    <button type={"button"}   key={index} onClick={() => handleUserSelect(message.updatedChatMessages)}>
                         {message.name}
-                    </div>
+                    </button>
                 ))}
             </div>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 max-h-100 overflow-y-auto border-l-2 pl-2">
                 {userMessages.map((message,index) => (
-                    <div className="flex gap-2">
-                        {message.role}
-                        {message.content}
+                    <div className="flex gap-2 ">
+                        <p className="min-w-1/6">{message.role}</p>
+                        <p className="">{message.content}</p>
                     </div>
                 ))}
             </div>

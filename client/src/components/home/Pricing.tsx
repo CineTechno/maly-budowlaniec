@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import {useEffect, useState, useRef, useContext} from "react";
 import { useInView } from "react-intersection-observer";
 import { motion } from "framer-motion";
 import { Send, AlertCircle, Info } from "lucide-react";
@@ -7,13 +7,16 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { pricingItems } from "../../../../server/pricingItems";
 import {v4 as uuidv4} from "uuid"
 import React from "react";
+import {CalendarContext} from "@/components/home/calendar/CalendarContext.tsx";
+import {Services} from "../../../../server/routes/services.ts";
+import ServicesAdmin from "../AdminPanel/ServicesAdmin";
 
 export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
 }
 
-export default function Pricing() {
+export default function Pricing({className}: { className: string }) {
   const [chatInput, setChatInput] = useState("");
   const [userName, setUserName] = useState("");
   const [userId, setUserId] = useState("");
@@ -27,6 +30,7 @@ export default function Pricing() {
         "Witaj! Jestem Twoim asystentem AI. Podaj swoje imię, aby rozpocząć wycenę.",
     },
   ]);
+  const [pricingItems, setPricingItems] = useState<Services[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const { ref, inView } = useInView({
@@ -34,6 +38,7 @@ export default function Pricing() {
     threshold: 0.1,
   });
 
+  const {isAdmin} = useContext(CalendarContext)
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -51,6 +56,15 @@ export default function Pricing() {
     }
 
     setUserId(existingUserId);
+
+    async function loadPricingItems(){
+      const response = await fetch("/api/services")
+      const json = await response.json()
+      setPricingItems(json)
+
+    }
+
+    void loadPricingItems();
   },[])
 
 
@@ -156,7 +170,7 @@ export default function Pricing() {
   };
 
   return (
-    <section id="pricing" className="py-12 md:py-24 bg-gray-50" ref={ref}>
+    <section id="pricing" className={`${className} py - 12 md:py-24 bg-gray-50`} ref={ref}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           className="text-center mb-8"
@@ -247,8 +261,8 @@ export default function Pricing() {
                         <tbody className="bg-white divide-y divide-gray-200">
                           {pricingItems
                             .filter((item) => item.category === category)
-                            .map((item) => (
-                              <tr key={item.id}>
+                            .map((item, i) => (
+                              <tr key={i}>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                   {item.service}
                                 </td>
@@ -272,7 +286,7 @@ export default function Pricing() {
           {/* AI Chat Estimator */}
           <motion.div
             id="ai-chat"
-            className="bg-white rounded-lg shadow-md overflow-hidden"
+            className={`${isAdmin?"hidden ":""}bg-white rounded-lg shadow-md overflow-hidden`}
             variants={containerVariants}
             initial="hidden"
             animate={inView ? "visible" : "hidden"}
@@ -404,6 +418,7 @@ export default function Pricing() {
           </motion.div>
         </div>
       </div>
+      <ServicesAdmin setPricingItems={setPricingItems} className={isAdmin?"": "hidden"}></ServicesAdmin>
     </section>
   );
 }

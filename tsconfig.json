@@ -26,4 +26,5 @@
     "noUncheckedSideEffectImports": true,
     "jsx": "react",
   },
+  "include": ["server"]
 }

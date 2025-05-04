@@ -35,8 +35,7 @@ estimate.get("/", async (req: Request, res: Response) => {
     return
   }
   res.json({response:chatHistory})
-  console.log("Sent chat history")
-  console.log(chatHistory)
+
 })
 
 estimate.post("/", async (req:Request<{},{},EstimateRequestBody>, res: Response): Promise<void> => {
@@ -91,7 +90,6 @@ estimate.post("/", async (req:Request<{},{},EstimateRequestBody>, res: Response)
       if (convo) {
         convo.updatedChatMessages=updatedChatMessages; // Append new messages
         await convo.save();
-        console.log("Estimate updated entry:", convo);
       } else {
          const newEntry = await Estimate.create({
           userId: userId,

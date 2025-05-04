@@ -13,10 +13,6 @@ calendar.post("/", async (req, res) => {
             {availabilities:req.body},
             {upsert:true, new: true}
             )
-        console.log("Type of req.body:", typeof req.body);
-        console.log("Is array?", Array.isArray(req.body));
-        console.log("Body content:", req.body);
-        console.log("Inserted:", newEntry);
         res.status(200).json({ message: "Success", data: newEntry });
     }catch(err){
         console.log(err)
